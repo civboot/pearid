@@ -23,6 +23,9 @@ stay on your harddisk (possibly in a `~/.secrets/` directory).
 * **DO** load it into your itsame browser extension to sign webpages.
 * **DO** use with applications you trust to sign communications with services.
 
+
+## Development Notes
+
 ## Notes
 
 Create an extension that signs content to ensure identity before posting.

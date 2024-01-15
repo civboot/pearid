@@ -7,8 +7,10 @@
   <!--<link rel="stylesheet" href="style.css">-->
 </head>
 <body>
+<script id="itsame-testing"></script>
 <script src="itsame.js"></script>
-<script type="data" id="private-key">-----BEGIN PRIVATE KEY-----
+<script type="data" id="private-key">
+-----BEGIN PRIVATE KEY-----
 MIIJQgIBADANBgkqhkiG9w0BAQEFAASCCSwwggkoAgEAAoICAQC3NyXw0CC6u1t4
 RqNW//6v6YhX86EIUgLvU+cyWNSuU1Kg4GqLNr0H32BQ1f+YG5238LKt+zbcvUKi
 jmOpGl5U38sgi6TQd/rfPp85VhVLW5xD/MxLDPXfnpSlySjFSbmZDz/KqE4k3Cf/
@@ -59,9 +61,11 @@ v4FVUgDXeIT/0Lx/43FV/TlrKXIYTUnCvPfto5bWZHd5hBc5BOenFEARANtcU956
 evKrqdxSnETo8aVLU0p74fWeyEXLooMQtS+RMPiwt575ASsFwocRMJ+qib1b1lsV
 S8D+PjBb3f6SiWrJY5vyQSnRWaPiwdFzM7lKtk6TS/boNzmUTfUtN6InuvcrdILl
 e+7x3qE0VcHyFIvH3hW1NQLhuLVmOQ==
------END PRIVATE KEY-----</script>
+-----END PRIVATE KEY-----
+</script>
 <h1>Example public key</h1>
 <script type="data" id="public-key">
+-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAtzcl8NAgurtbeEajVv/+
 r+mIV/OhCFIC71PnMljUrlNSoOBqiza9B99gUNX/mBudt/Cyrfs23L1Coo5jqRpe
 VN/LIIuk0Hf63z6fOVYVS1ucQ/zMSwz1356UpckoxUm5mQ8/yqhOJNwn/1waJb8S
@@ -73,10 +77,19 @@ pMcjkU6whpKjJKEqiQvg7Sn0mbnlHcyBIFfcT2ZFWK+I65WmRx2VZ4qtTpnwIJy5
 I3IIDDZ166KBG7waJjgokOZu5wvIuZU5jz28qxKhLVi7u4nhLIVhxBrDcbBe7NYI
 U4+XMswGxe+PPqWRUYH3VtcE/zo+0vcvbKX10n96lPSphyNb24Vix3r+omUgmd7C
 b7SvWBm1kOFeP5QTMcxSqgAinfuR2wXrzoNmRseWO9W5NY1Aaz4fcjAAOuzTlAE1
-YjdzufQ1pWUZfJ7UazSFbeECAwEAAQ==</script>
+YjdzufQ1pWUZfJ7UazSFbeECAwEAAQ==
+-----END PUBLIC KEY-----
+</script>
 
-<h1>Encrypted</h1>
-<div id='encrypted'></span>
-<div id='decrypted'></span>
+<h1>Direct (fake) Tests</h1>
+<h2>Encrypted</h2>
+<div id='encrypted'></div>
+<h2>Decrypted</h2>
+<div id='decrypted'></div>
+<h2>Signature</h2>
+<p><span id='signature'></span></p>
+<p><b>Verfied: <span id='verified'></span></b><p>
+
+<h1>Extension Testing</h1>
 </body>
 </html>
