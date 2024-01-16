@@ -19,6 +19,10 @@ or an alternative server).
 It includes a browser extension which webpages can target to offer
 ultra-lightweight identity verification for the web and beyond.
 
+![icon](./browser/icon128.png)
+
+_([icon source](https://publicdomainvectors.org/en/free-clipart/Yin-Yang-lotus/82377.html))_
+
 ## Getting Started (Browser Extension)
 
 Create a private/public keypair
@@ -105,3 +109,4 @@ This software is released into the public domain, see LICENSE (aka UNLICENSE).
 
 This software is part of the Civboot.org tech stack. Attribution is appreciated
 but not required.
+
