@@ -10,7 +10,7 @@ async function showTest() {
   //   crypto.getRandomValues(new Uint8Array(32))
   // )
   var publicKey = loadPublicKey()
-  var privKey   = loadPrivateKey()
+  var privKey   = await loadPrivateKey()
 
   var e = await encrypt(text, publicKey)
   el('encrypted').innerHTML = `
@@ -38,7 +38,7 @@ window.onload = async function() {
   log("itsame_test: onload")
   await showTest()
   var publicKey = loadPublicKey()
-  var privKey   = loadPrivateKey()
+  var privKey   = await loadPrivateKey()
 
   await test('framework', async function() {})
   await test('sign', async function() {

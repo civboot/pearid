@@ -10,18 +10,51 @@ with know that your communication is you and nobody else.
 Create a private/public keypair
 
 ```
-openssl genrsa -out itsame.secret 4096
-openssl rsa -in itsame.secret -pubout > itsame.public
+mkdir -p ~/.secrets/
+openssl genrsa -out ~/.secrets/itsame.secret 4096
+openssl rsa -in itsame.secret -pubout > ~/.secrets/itsame.public
 ```
 
-As the name implies, your `itsame.secret` key (file) is secret. It should
-stay on your harddisk (possibly in a `~/.secrets/` directory).
+Your `itsame.public` file should be shared with the websites you want to access
+with your identity. It is public, it doesn't really matter who has it.
+
+Your `itsame.secret` file should be kept secret:
 
 * **DON'T** share it with anyone else
-* **MAYBE** make a physical backup of it on a few USB sticks and put them in a
-  safe place (if you care about the key)
 * **DO** load it into your itsame browser extension to sign webpages.
 * **DO** use with applications you trust to sign communications with services.
+* **MAYBE** make a physical backup of it on a few USB sticks and put them in a
+  safe place (if you care about the key)
+
+## Browser Extension
+[browser/itsame.js](./browser/itsame.js) contains a browser extension which
+automatically signs (injects a signature) into elements containing
+`class='itsame-form'`. It requires the user to copy their signature
+into the extension.
+
+For example, a page with:
+
+```html
+<form id='my-form', class='itsame-form'>
+  <input name="user"      value="Alice Bob"  class='itsame-value'></input>
+  <input name="birthdate" value="2001-10-31" class='itsame-value'></input>
+  <p><b>Payload: </b><span class='itsame-payload'>  <i>no payload yet</i></span></p>
+  <p><b>Signature: </b><span class='itsame-signature'><i>no signature yet</i></span></p>
+  <input type="button" onclick="submitForm('play-form2')" value="Submit">
+</form>
+```
+
+Will have the `itsame-payload` element`'s innerText set to:
+```
+[["user","Alice Bob"],["birthdate","2001-10-31"]]
+```
+
+The signature element will be set to the signature of the payload,
+signed using the loaded private key.
+
+When the user hits `submit`, the `submitForm` javascript will see the updated
+payload and signature (note: obviously they are also free to construct the
+payload themselves).
 
 
 ## Development Notes

@@ -1,10 +1,11 @@
+// Note: lib.js is stitched with ext.js and test.js to create
+// itsame.js and itsame_test.js.
+// Why? Because I can't figure out way to import javascript
+// in the file:// API (no, script<type="module">) does NOT work,
+// and subtle doesn't exist if you are running an HTTP server.
+
 // Useful docs:
 // * https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto
-//
-// The following were highly useful to develop this:
-//
-// https://medium.com/@tony.infisical/guide-to-web-crypto-api-for-encryption-decryption-1a2c698ebc25
-// https://stackoverflow.com/questions/34814480/how-to-load-a-public-key-in-pem-format-for-encryption/34995761#34995761
 
 function el(id) { return document.getElementById(id) }
 assert = console.assert
@@ -34,7 +35,8 @@ function loadPublicKey() {
   }
 }
 
-function loadPrivateKey() {
+async function loadPrivateKey() {
+  log("loading fake private key")
   var fake = el('itsame-fake-private-key'); if(fake) {
     return fake.innerText;
   }
@@ -158,7 +160,12 @@ async function signingKey(key) {
 }
 
 sign = async function(text, privateKey) {
-  const key = await signingKey(privateKey)
+  var key; try { key = await signingKey(privateKey)
+  } catch(e) {
+    console.error('failed to load private key: ' + e, e.stack)
+    throw e
+  }
+
   const signatureBuf = await subtle.sign(
     RSA_PSS_PARAMS,
     key,
