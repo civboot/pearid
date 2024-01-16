@@ -14,8 +14,6 @@ log    = console.log
 const crypto = window.crypto || window.msCrypto;
 const subtle = crypto.subtle
 
-assert(subtle, "SubtleCrypto not available")
-
 const RSA_OAEP = {
   name: "RSA-OAEP",
   hash: { name: "SHA-256" }
@@ -27,19 +25,6 @@ const RSA_PSS = {
 const RSA_PSS_PARAMS = {
   name: "RSA-PSS",
   saltLength: 32, // 256 bit
-}
-
-function loadPublicKey() {
-  var fake = el('itsame-fake-public-key'); if(fake) {
-    return fake.innerText;
-  }
-}
-
-async function loadPrivateKey() {
-  log("loading fake private key")
-  var fake = el('itsame-fake-private-key'); if(fake) {
-    return fake.innerText;
-  }
 }
 
 // encode an ArrayBuffer (of ints) as a base64 String
@@ -193,12 +178,10 @@ processFormChild = function(res, n) {
     }
     res.payload.push([name, val])
     return
-  }
-  else if(cl.contains('itsame-payload'))   {
-    res.payNode = n; return;
-  }
-  else if(cl.contains('itsame-signature')) {
+  } else if(cl.contains('itsame-signature')) {
     res.sigNode = n; return;
+  } else if(cl.contains('itsame-payload'))   {
+    res.payNode = n; return;
   }
   for(child of n.childNodes) {
     processFormChild(res, child)
@@ -206,8 +189,17 @@ processFormChild = function(res, n) {
 }
 
 processForm = function(form) {
-  var res = { payload: [], sigNode: null, payNode: null }
+  var res = {
+    payload: [],
+    sigNode: null, payNode: null,
+  }
   for(n of form.childNodes) { processFormChild(res, n) }
+  var hasUuid = false; for(p of res.payload) {
+    if(p[0] == 'uuid') { hasUuid = true; break }
+  }
+  if(!hasUuid) {
+    throw new Error('invalid page: missing name="uuid" itsame-value in itsame-form')
+  }
   res.payload = JSON.stringify(res.payload)
   return res
 }

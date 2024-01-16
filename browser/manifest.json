@@ -1,4 +1,9 @@
 {
+  "author": {
+    "email": "vitiral@gmail.com"
+  },
+  "homepage_url": "http://github.com/civboot/itsame",
+  "description": "tell webpages it's you with a private key",
   "manifest_version": 3,
   "name": "itsame",
   "version": "0.1.1",

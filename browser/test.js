@@ -1,6 +1,18 @@
 // itsame test and playground
 // Note: this is stitched with 'lib.js' to create 'itsame_test.js'
 
+function loadPublicKey() {
+  var fake = el('itsame-fake-public-key'); if(fake) {
+    return fake.innerText;
+  }
+}
+
+async function loadPrivateKey() {
+  var fake = el('itsame-fake-private-key'); if(fake) {
+    return fake.innerText;
+  }
+}
+
 async function showTest() {
   // some plaintext you want to encrypt
   const text = 'The quick brown fox jumps over the lazy dog';
@@ -51,7 +63,9 @@ window.onload = async function() {
     var forms = findForms();
     assert(forms.length == 2)
     var form0 = forms[0]
-    assert(form0.payload === '[["inp1","Input to itsame"]]')
+    log('payload', form0.payload)
+    assert(form0.payload ===
+      '[["inp1","Input to itsame"],["uuid","a-unique-id"]]')
     assert(form0.payNode)
     assert(form0.sigNode)
   })

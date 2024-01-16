@@ -6,27 +6,23 @@ const localStorage = storage.local
 
 function privateFromStorage() {
   return new Promise((resolve) => {
-    log('in promise', localStorage)
     localStorage.get({ privateKey: ''},
       (items) => {
-        log('resolving promise', items.privateKey)
         resolve(items.privateKey)
-        log('resolved promise')
       }
     )
   })
 }
 
 async function itsame(privateKey) {
-  log('resolved privatekey')
-  log("in itsame function")
+  if(!subtle) {
+    log("Subtle crypto not available, itsame exiting")
+    return
+  }
   for(form of findForms()) {
-    log("got form:", form)
     if(form.payNode) { form.payNode.innerText = form.payload }
     if(form.sigNode) {
-      log("signing:", form.payload)
       var sig = await sign(form.payload, privateKey)
-      log("signing form")
       form.sigNode.innerText = sig
     }
   }

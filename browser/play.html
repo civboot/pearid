@@ -97,15 +97,18 @@ function submitForm(id) {
 </script>
 <h2>Form1</h2>
 <form id='play-form1', class='itsame-form'>
-  <div name="inp1" value="Input to itsame" class='itsame-value'>(has value)</div>
+  <div name="inp1" value="Input to itsame" class='itsame-value'>A Div element with value "Input to itsame"</div>
+  <span name="uuid" value="a-unique-id" class='itsame-value'></span>
   <p><b>Payload:   </b><span class='itsame-payload'>  <i>no payload yet</i>  </span></p>
   <p><b>Signature: </b><span class='itsame-signature'><i>no signature yet</i></span></p>
+
   <input type="button" onclick="submitForm('play-form1')" value="Submit">
 </form>
 <h2>Form2</h2>
 <form id='play-form2', class='itsame-form'>
   <input name="user"      value="Alice Bob"  class='itsame-value'></input>
   <input name="birthdate" value="2001-10-31" class='itsame-value'></input>
+  <span name="uuid" value="a-unique-id" class='itsame-value'></span>
   <p><b>Payload: </b><span class='itsame-payload'>  <i>no payload yet</i></span></p>
   <p><b>Signature: </b><span class='itsame-signature'><i>no signature yet</i></span></p>
   <input type="button" onclick="submitForm('play-form2')" value="Submit">
