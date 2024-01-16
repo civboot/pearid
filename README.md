@@ -1,6 +1,18 @@
 # itsame: tell servers it's you with a private key
 
-It's-a-me (itsame) is a simple encoding standard for proving your identity.
+> **WARNING:** This extension is in pre-alpha and uses cryptographic technology
+> in a reasonably user-friendly way. However, the author is not a security
+> engineer and the software has not (yet) been verified by any security
+> engineers.
+>
+> The "itsame" standard and browser extension comes with no warranty of any kind
+> (see LICENSE). It is currently made available mostly so that folks can
+> experiment, think and review the concepts in order to create a simple and
+> robust authentication scheme in the future.
+>
+> **DO NOT USE THIS SOFTWARE FOR ANY CRITICAL DATA OR SERVICES**
+
+itsame ("It's-a-me") is a simple encoding standard for proving your identity.
 It is designed to be easy for anyone to implement anywhere (either on a webpage
 or an alternative server).
 
@@ -17,17 +29,20 @@ openssl genrsa -out ~/.secrets/itsame.secret 4096
 openssl rsa -in itsame.secret -pubout > ~/.secrets/itsame.public
 ```
 
-Your `itsame.public` file should be shared with the websites you want to access
-with your identity (i.e. by sending the administrator an email, opening an
-issue, etc). It is public, it doesn't really matter who has it.
+Your `itsame.public` file should be shared with the servers/websites you want to
+access with your identity (i.e. by sending the administrator an email, opening
+an issue, etc). It is public, it doesn't really matter who has it.
 
-Your `itsame.secret` file should be kept secret:
+Your `itsame.secret` file should be kept secret. If anyone has access to it
+they will be able to impersonate you on whatever servers you've registered with.
 
-* **DON'T** share it with anyone else
-* **DO** load it into your itsame browser extension to sign webpages.
-* **DO** use with applications you trust to sign communications with services.
+* **DON'T** share it with anyone you don't share your bank account with, and
+  consider keeping it secret from them too.
+* **DO** load it into your itsame browser extension to sign request payloads
+* **DO** load it into applications you trust in order to sign request payloads
 * **MAYBE** make a physical backup of it on a few USB sticks and put them in a
-  safe place (if you care about the key)
+  safe place... or if you loose the key just generate a new one -- but you'll
+  have to re-register with all the servers you registered with.
 
 ## Browser Extension
 [browser/itsame.js](./browser/itsame.js) contains a browser extension which
@@ -60,11 +75,19 @@ When the user hits `submit`, the `submitForm` javascript will see the updated
 payload and signature (note: obviously they are also free to construct the
 payload themselves), which they then format and send to the server.
 
-It is server's job to make sure `uuid` is a unique identifier for each "session"
-(to prevent a snooper from repeating a request). This is trivial: on every page
-load increment an id, which you store with completed requests. Assuming that is
-true, if the signature is valid (according to the public key) then the payload
-could only have been created by someone in possession of the private key.
+It is server's job to ensure that `uuid` (which is required) is a unique
+identifier for each "session" (to prevent a snooper from repeating a request).
+This is trivial: on every page load increment an id, which you store with
+completed requests. Assuming the server has done this, if the signature is valid
+(according to the public key) then the payload could only have been created by
+someone in possession of the private key.
+
+## Future improvements:
+
+* Security review.
+* Allow specifying a private key for specific URL patterns. In paritular,
+  prevent the extension from trying to sign every website you visit.
+* Allow creation of private keys from within the extension
 
 ## Development Notes
 Testing is done locally by running `itsame/browser/make.lua` and opening
