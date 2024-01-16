@@ -7,9 +7,8 @@
   <!--<link rel="stylesheet" href="style.css">-->
 </head>
 <body>
-<script id="itsame-testing"></script>
-<script src="itsame.js"></script>
-<script type="data" id="private-key">
+<script src="itsame_test.js"></script>
+<script type="data" id="itsame-fake-private-key">
 -----BEGIN PRIVATE KEY-----
 MIIJQgIBADANBgkqhkiG9w0BAQEFAASCCSwwggkoAgEAAoICAQC3NyXw0CC6u1t4
 RqNW//6v6YhX86EIUgLvU+cyWNSuU1Kg4GqLNr0H32BQ1f+YG5238LKt+zbcvUKi
@@ -64,7 +63,7 @@ e+7x3qE0VcHyFIvH3hW1NQLhuLVmOQ==
 -----END PRIVATE KEY-----
 </script>
 <h1>Example public key</h1>
-<script type="data" id="public-key">
+<script type="data" id="itsame-fake-public-key">
 -----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAtzcl8NAgurtbeEajVv/+
 r+mIV/OhCFIC71PnMljUrlNSoOBqiza9B99gUNX/mBudt/Cyrfs23L1Coo5jqRpe
@@ -90,6 +89,28 @@ YjdzufQ1pWUZfJ7UazSFbeECAwEAAQ==
 <p><span id='signature'></span></p>
 <p><b>Verfied: <span id='verified'></span></b><p>
 
-<h1>Extension Testing</h1>
+<h1>Extension Playing</h1>
+<script>
+function submitForm(id) {
+  alert(document.getElementById(id).innerHTML + '')
+}
+</script>
+<h2>Form1</h2>
+<form id='play-form1', class='itsame-form'>
+  <div name="inp1" value="Input to itsame" class='itsame-value'>(has value)</div>
+  <p><b>Payload:   </b><span class='itsame-payload'>  <i>no payload yet</i>  </span></p>
+  <p><b>Signature: </b><span class='itsame-signature'><i>no signature yet</i></span></p>
+  <input type="button" onclick="submitForm('play-form1')" value="Submit">
+</form>
+<h2>Form2</h2>
+<form id='play-form2', class='itsame-form'>
+  <input name="user"      value="Alice Bob"  class='itsame-value'></input>
+  <input name="birthdate" value="2001-10-31" class='itsame-value'></input>
+  <p><b>Payload: </b><span class='itsame-payload'>  <i>no payload yet</i></span></p>
+  <p><b>Signature: </b><span class='itsame-signature'><i>no signature yet</i></span></p>
+  <input type="button" onclick="submitForm('play-form2')" value="Submit">
+</form>
+<h1>Tests</h1>
+<ul id='test-results'></ul>
 </body>
 </html>
