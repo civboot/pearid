@@ -14,22 +14,11 @@ async function loadPrivateKey() {
 }
 
 async function showTest() {
-  // some plaintext you want to encrypt
+  // some plaintext you want to sign
   const text = 'The quick brown fox jumps over the lazy dog';
 
-  // create or bring your own base64-encoded encryption key
-  // const key = encodeB64(
-  //   crypto.getRandomValues(new Uint8Array(32))
-  // )
   var publicKey = loadPublicKey()
   var privKey   = await loadPrivateKey()
-
-  var e = await encrypt(text, publicKey)
-  el('encrypted').innerHTML = `
-  <p>iv=${e.iv}</p>
-  <p>${e.ciphertext}</p>`
-  var d = await decrypt(e.ciphertext, e.iv, privKey)
-  el('decrypted').innerHTML = d
 
   var s = await sign(text, privKey)
   el('signature').innerHTML = s
@@ -53,6 +42,15 @@ window.onload = async function() {
   var privKey   = await loadPrivateKey()
 
   await test('framework', async function() {})
+  await test('export', async function() {
+    var exportedPriv = await exportPrivateKey(
+        await importSigningKey(privKey))
+    assert(privKey.trim() == exportedPriv.trim())
+
+    var exportedPub = await exportPublicKey(
+        await importVerifyingKey(publicKey))
+    assert(publicKey.trim() == exportedPub.trim())
+  })
   await test('sign', async function() {
     var text = "this is a test"
     var s = await sign(text, privKey)

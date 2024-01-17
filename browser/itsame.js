@@ -10,14 +10,13 @@
 function el(id) { return document.getElementById(id) }
 assert = console.assert
 log    = console.log
+function loge(error) {
+  log(`ERROR ${error}, stack: ${error.stack}`)
+}
 
 const crypto = window.crypto || window.msCrypto;
 const subtle = crypto.subtle
 
-const RSA_OAEP = {
-  name: "RSA-OAEP",
-  hash: { name: "SHA-256" }
-};
 const RSA_PSS = {
   name: "RSA-PSS",
   hash: { name: "SHA-256" }
@@ -25,6 +24,12 @@ const RSA_PSS = {
 const RSA_PSS_PARAMS = {
   name: "RSA-PSS",
   saltLength: 32, // 256 bit
+}
+const RSA_PSS_PAIR = {
+  name: "RSA-PSS",
+  modulusLength: 4096,
+  publicExponent: [0x01, 0x00, 0x01],
+  hash: "SHA-256",
 }
 
 // encode an ArrayBuffer (of ints) as a base64 String
@@ -70,82 +75,43 @@ function fmtKey(header, key) {
 }
 
 // ---------------------------
-// -- ENCRYPTION / DECRYPTION
-async function importKey_RSA_OAEP(key, format, keyUsages) {
-  var cleanKey = unfmtKey(key)
-  return await crypto.subtle.importKey(
-    format,
-    decodeB64(cleanKey),
-    RSA_OAEP,
-    false,
-    keyUsages);
-}
-async function pubEncryptKey(key) {
-  return importKey_RSA_OAEP(key, "spki", ["encrypt"])
-}
-async function privateEncryptKey(key) {
-  return importKey_RSA_OAEP(key, "pkcs8", ["decrypt"])
-}
-
-encrypt = async function(plaintext, publicKey) {
-  // create a random 96-bit initialization vector (IV)
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-
-  // encode the text you want to encrypt
-  const encodedPlaintext = new TextEncoder().encode(plaintext);
-
-  // prepare the secret key for encryption
-  const key = await pubEncryptKey(publicKey)
-
-  // encrypt the text with the secret key
-  const encodedBuffer = await subtle.encrypt({
-      name: 'RSA-OAEP',
-      label: iv,
-  }, key, encodedPlaintext);
-
-  // return the encrypted text "ciphertext" and the IV
-  // encoded in base64
-  return ({
-      ciphertext: encodeB64(encodedBuffer),
-      iv: encodeB64(iv),
-  })
-}
-
-decrypt = async function(ciphertext, iv, privateKey) {
-  // prepare the secret key
-  const key = await privateEncryptKey(privateKey)
-  const cleartext = await subtle.decrypt({
-      name: 'RSA-OAEP',
-      label: decodeB64(iv),
-  }, key, decodeB64(ciphertext))
-
-  // decode the text and return it
-  return new TextDecoder().decode(cleartext);
-}
-
-// ---------------------------
 // -- SIGN / VERIFY
 async function importKey_RSA_PSS(key, format, keyUsages) {
   var cleanKey = unfmtKey(key)
 
-  return await crypto.subtle.importKey(
-    format,
-    decodeB64(cleanKey),
-    RSA_PSS,
-    false,
-    keyUsages);
+  try {
+    return await crypto.subtle.importKey(
+      format,
+      decodeB64(cleanKey),
+      RSA_PSS,
+      true,
+      keyUsages);
+  } catch(e) {
+    console.error(`${e}: ${e.message} ${e.lineNumber}`)
+    throw e
+  }
 }
 
 // spki is public only
-async function verifyingKey(key) {
+async function importVerifyingKey(key) {
   return importKey_RSA_PSS(key, "spki", ["verify"])
 }
-async function signingKey(key) {
+async function importSigningKey(key) {
   return importKey_RSA_PSS(key, "pkcs8", ["sign"])
 }
 
+async function exportPublicKey(verifyingKey) {
+  var exported = await subtle.exportKey("spki", verifyingKey)
+  return fmtKey("PUBLIC", encodeB64(exported))
+}
+async function exportPrivateKey(signingKey) {
+  var exported = await subtle.exportKey("pkcs8", signingKey)
+  return fmtKey("PRIVATE", encodeB64(exported))
+}
+
+
 sign = async function(text, privateKey) {
-  var key; try { key = await signingKey(privateKey)
+  var key; try { key = await importSigningKey(privateKey)
   } catch(e) {
     console.error('failed to load private key: ' + e, e.stack)
     throw e
@@ -159,7 +125,7 @@ sign = async function(text, privateKey) {
 }
 
 verify = async function(text, signature, publicKey) {
-  const key = await verifyingKey(publicKey)
+  const key = await importVerifyingKey(publicKey)
   return await subtle.verify(
     RSA_PSS_PARAMS,
     key,
