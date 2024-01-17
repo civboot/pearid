@@ -35,7 +35,16 @@ async function test(name, fn) {
   results.innerHTML += result
 }
 
+generateOptions = async function() {
+  log('generating options')
+  var pair = await createKeyPair()
+  document.getElementById('public-key').value  = pair.publicKey
+  document.getElementById('private-key').value = pair.privateKey
+}
+
 window.onload = async function() {
+  document.getElementById('generate').addEventListener('click', generateOptions);
+
   log("pearid_test: onload")
   await showTest()
   var publicKey = loadPublicKey()

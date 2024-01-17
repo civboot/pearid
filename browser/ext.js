@@ -4,17 +4,7 @@
 const storage = chrome.storage
 const localStorage = storage.local
 
-function privateFromStorage() {
-  return new Promise((resolve) => {
-    localStorage.get({ privateKey: ''},
-      (items) => {
-        resolve(items.privateKey)
-      }
-    )
-  })
-}
-
-async function pearid(privateKey) {
+async function pearid(keys) {
   if(!subtle) {
     log("Subtle crypto not available, pearid exiting")
     return
@@ -22,12 +12,12 @@ async function pearid(privateKey) {
   for(form of findForms()) {
     if(form.payNode) { form.payNode.innerText = form.payload }
     if(form.sigNode) {
-      var sig = await sign(form.payload, privateKey)
+      var sig = await sign(form.payload, keys.privateKey)
       form.sigNode.innerText = sig
     }
   }
 }
 
-privateFromStorage()
+getKeysFromStorage()
   .then(pearid)
   .catch(console.error)

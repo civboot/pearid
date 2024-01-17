@@ -11,11 +11,13 @@ local function writepath(path, text)
 end
 
 local function main()
-  local lib = readpath'lib.js'
-  local test = readpath'test.js'
-  local ext = readpath'ext.js'
-  writepath('pearid_test.js', lib..'\n'..test)
-  writepath('pearid.js',      lib..'\n'..ext)
+  local lib     = readpath'lib.js'
+  local test    = readpath'test.js'
+  local ext     = readpath'ext.js'
+  local options = readpath'options.js'
+  writepath('pearid_test.js',    lib..'\n'..test)
+  writepath('pearid.js',         lib..'\n'..ext)
+  writepath('pearid_options.js', lib..'\n'..options)
 end
 
 print'Constantly writing to pearid.js and pearid_test.js'

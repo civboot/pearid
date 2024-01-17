@@ -17,20 +17,9 @@ function loge(error) {
 const crypto = window.crypto || window.msCrypto;
 const subtle = crypto.subtle
 
-const RSA_PSS = {
-  name: "RSA-PSS",
-  hash: { name: "SHA-256" }
-};
-const RSA_PSS_PARAMS = {
-  name: "RSA-PSS",
-  saltLength: 32, // 256 bit
-}
-const RSA_PSS_PAIR = {
-  name: "RSA-PSS",
-  modulusLength: 4096,
-  publicExponent: [0x01, 0x00, 0x01],
-  hash: "SHA-256",
-}
+
+// ---------------------------
+// -- Utilities
 
 // encode an ArrayBuffer (of ints) as a base64 String
 function encodeB64(arrayBuffer) {
@@ -74,8 +63,24 @@ function fmtKey(header, key) {
   return lines.join('\n')
 }
 
+const RSA_PSS = {
+  name: "RSA-PSS",
+  hash: { name: "SHA-256" }
+};
+const RSA_PSS_PARAMS = {
+  name: "RSA-PSS",
+  saltLength: 32, // 256 bit
+}
+const RSA_PSS_PAIR = {
+  name: "RSA-PSS",
+  modulusLength: 4096,
+  publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+  hash: "SHA-256",
+}
+
 // ---------------------------
-// -- SIGN / VERIFY
+// -- Crypto Stuff
+
 async function importKey_RSA_PSS(key, format, keyUsages) {
   var cleanKey = unfmtKey(key)
 
@@ -109,6 +114,15 @@ async function exportPrivateKey(signingKey) {
   return fmtKey("PRIVATE", encodeB64(exported))
 }
 
+async function createKeyPair() {
+  var pair = await subtle.generateKey(
+    RSA_PSS_PAIR, true, ["sign", "verify"])
+  return {
+    publicKey: await exportPublicKey(pair.publicKey),
+    privateKey: await exportPrivateKey(pair.privateKey),
+  }
+}
+
 
 sign = async function(text, privateKey) {
   var key; try { key = await importSigningKey(privateKey)
@@ -132,6 +146,24 @@ verify = async function(text, signature, publicKey) {
     decodeB64(signature),
     new TextEncoder().encode(text))
 }
+
+// ---------------------------
+// -- Load / Store
+
+function getKeysFromStorage() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get({ privateKey: '', publicKey: ''}, resolve)
+  })
+}
+
+function setKeysInStorage(keys) {
+  return new Promise((resolve) => {
+    chrome.storage.local.set(keys, resolve)
+  })
+}
+
+// ---------------------------
+// -- Html Processing
 
 // Recursively find the relevant elements
 processFormChild = function(res, n) {
@@ -216,7 +248,16 @@ async function test(name, fn) {
   results.innerHTML += result
 }
 
+generateOptions = async function() {
+  log('generating options')
+  var pair = await createKeyPair()
+  document.getElementById('public-key').value  = pair.publicKey
+  document.getElementById('private-key').value = pair.privateKey
+}
+
 window.onload = async function() {
+  document.getElementById('generate').addEventListener('click', generateOptions);
+
   log("pearid_test: onload")
   await showTest()
   var publicKey = loadPublicKey()

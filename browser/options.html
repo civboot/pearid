@@ -4,6 +4,12 @@
     <title>pearid Extension Options</title>
   </head>
   <body>
+    <button id="generate">Generate New Keypair</button>
+
+    <h2>Public Key</h2>
+    This can be shared with anyone
+    <p><textarea rows="24" cols="70" id="public-key"></textarea>
+
     <h2>Private Key</h2>
     <p><b>Do not share this value with anyone.</b>
     <p>Your private key is used to fill out <i>pearid-signature</i> fields in
@@ -24,6 +30,6 @@ openssl rsa -in pearid.secret -pubout &gt; ~/.secrets/pearid.public
 
     <div id="status"></div>
     <button id="save">Save</button>
-    <script src="options.js"></script>
+    <script src="pearid_options.js"></script>
   </body>
 </html>
