@@ -1,12 +1,11 @@
 {
+  "name": "pearid",
+  "version": "0.1.2",
+  "description": "id authentication using a public/private keypair",
   "author": {
     "email": "vitiral@gmail.com"
   },
   "homepage_url": "http://github.com/civboot/pearid",
-  "description": "id authentication using a public/private keypair",
-  "manifest_version": 3,
-  "name": "pearid",
-  "version": "0.1.1",
   "permissions": [
     "storage"
   ],
@@ -23,6 +22,6 @@
     "16": "icon16.png",
     "48": "icon48.png",
     "128": "icon128.png"
-  }
-
+  },
+  "manifest_version": 3
 }

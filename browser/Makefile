@@ -1,4 +1,4 @@
-SRCS=(manifest.json icon* pearid.js pearid_options.js options.html)
+SRCS=manifest.json icon* pearid.js pearid_options.js options.html
 
 zip:
 	rm -f /tmp/pearid.zip
