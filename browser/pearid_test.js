@@ -211,11 +211,10 @@ findForms = () => {
 
 const updateSignatures = async (_ev) => {
   if(!subtle) {
-    log("pearid: exiting, subtle crypto not available")
+    log("pearid: subtle crypto not available. Exiting")
     return
   }
   var id = el('pearid')
-  log('got pearid: ', id.value, 'el=', id)
   if (!id
       || (typeof id.value == 'undefined')
       || (id.value.trim() == NOID)) { return }
@@ -226,14 +225,10 @@ const updateSignatures = async (_ev) => {
     if(confirm(msg)) { id.value = keys.publicKey }
     else             { id.value = NOID; return }
   }
-  log("finding forms")
   for(form of findForms()) {
-    log("found form", form)
     if(form.payloadEl) {
-      log("form payloadEl:", form.payloadEl)
       form.payloadEl.value = form.payload }
     if(form.signatureEl) {
-      log("form signatureEl:", form.signatureEl)
       var sig = await sign(form.payload, keys.privateKey)
       form.signatureEl.value = sig
     }

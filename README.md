@@ -13,7 +13,7 @@
 > **DO NOT USE THIS SOFTWARE FOR ANY CRITICAL DATA OR SERVICES**
 
 pearid (Pear Id) is a simple standard for proving your identity with web (or other)
-servers. It is designed to be easy to both implement for and use. It includes a
+servers. It is designed to be easy to both implement and use. It includes a
 browser extension which allows ultra-lightweight identity verification for the
 web and beyond. Other libraries will likely be provided and/or linked in the
 future.
@@ -32,35 +32,38 @@ source](https://publicdomainvectors.org/en/free-clipart/Pear-vector-clip-art/583
 Install the browser extension. Eventually this will be provided on the
 Chrome/Firefox web stores. For now (or if developing) you install with:
 
-* Chrome: [chrome://extensions](chrome://extensions) -> **Load Unpacked**
+* Chrome: url `chrome://extensions` -> click **Load Unpacked** -> load
+  `browser/` directory in pearid
 * Firefox: not yet tested or supported
 
 Once installed, open the extension settings and click **Generate New Keypair**.
-Altenatively you can copy/paste keypairs generated from openssl
+**Warning:** PairId only stores the keys locally and there is no way to recover
+a lost private key, so consider storing your private key somewhere private and
+secure.
 
+The public key (called your **PearId**) can be shared with the servers/websites
+you want to access with your identity. The browser extension will automatically
+ask if you want to share your PearId with websites that support it.
+
+Your private key **must be kept secret**. If anyone has access to it they will
+be able to impersonate you on whatever servers you've registered with.
+
+* **DON'T** share it with anyone you don't share your bank account with, and
+  consider keeping it secret from them too.
+* **DO** keep it loaded it into your PearId
+  [browser extension](#browser-extension) to sign request payloads
+* **DO** load it into applications you trust in order to sign request payloads
+* **MAYBE** store it in secure locations you trust.
+
+### Bring Your Own Id
+
+You can also create a public/private key on the command line and copy/paste
+them into PearId:
 ```
 # On linux
 openssl genrsa -out pear.private 4096
 openssl rsa -in pear.private -pubout -out pear.public
-
-# TODO: windows/etc support
 ```
-
-The public key (called your **pearid**) can be shared with the servers/websites
-you want to access with your identity. This is often implemented directly in
-the websites you visit, but your server/community may differ (i.e. you may
-send a maintainter an email with your public key).
-
-Your `pear.private` file **should be kept secret**. If anyone has access to it
-they will be able to impersonate you on whatever servers you've registered with.
-
-* **DON'T** share it with anyone you don't share your bank account with, and
-  consider keeping it secret from them too.
-* **DO** load it into your pearid browser extension to sign request payloads
-* **DO** load it into applications you trust in order to sign request payloads
-* **MAYBE** make a physical backup of it on a few USB sticks and put them in a
-  safe place... or if you loose the key just generate a new one -- but you'll
-  have to re-register with all the servers you registered with.
 
 ## Browser Extension
 [browser/pearid.js](./browser/pearid.js) contains a browser extension which
