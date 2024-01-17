@@ -3,17 +3,31 @@
 
 const storage = chrome.storage
 const localStorage = storage.local
+const DENIED = 'pearid-denied'
 
 async function pearid(keys) {
   if(!subtle) {
-    log("Subtle crypto not available, pearid exiting")
+    log("pearid: exiting, subtle crypto not available")
     return
   }
+  var id = el('pearid')
+  if (!id || (typeof id.value == 'undefined')) { return }
+  else if (id.value == DENIED) { return; }
+  else if(id.value.trim() != keys.publicKey.trim()) {
+    var msg = "PearID: okay to share your identity?"
+    if(confirm(msg)) { id.value = keys.publicKey }
+    else             { id.value = DENIED; return }
+  }
+  log("finding forms")
   for(form of findForms()) {
-    if(form.payNode) { form.payNode.innerText = form.payload }
-    if(form.sigNode) {
+    log("found form", form)
+    if(form.payloadEl) {
+      log("form payloadEl:", form.payloadEl)
+      form.payloadEl.value = form.payload }
+    if(form.signatureEl) {
+      log("form signatureEl:", form.signatureEl)
       var sig = await sign(form.payload, keys.privateKey)
-      form.sigNode.innerText = sig
+      form.signatureEl.value = sig
     }
   }
 }

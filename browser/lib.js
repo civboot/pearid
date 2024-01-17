@@ -166,22 +166,17 @@ function setKeysInStorage(keys) {
 // -- Html Processing
 
 // Recursively find the relevant elements
-processFormChild = function(res, n) {
-  var cl = n.classList; if(!cl) {} // skip
+processFormChild = function(res, e) {
+  var cl = e.classList; if(!cl) {} // skip
   else if(cl.contains('pearid-value')) {
-    var name = ""; var val = null
-    for(at of n.attributes) {
-      if(at.nodeName == 'name')  { name = at.nodeValue }
-      if(at.nodeName == 'value') { val =  at.nodeValue }
-    }
-    res.payload.push([name, val])
+    res.payload.push([e.name ? e.name : "", e.value])
     return
   } else if(cl.contains('pearid-signature')) {
-    res.sigNode = n; return;
+    res.signatureEl = e; return;
   } else if(cl.contains('pearid-payload'))   {
-    res.payNode = n; return;
+    res.payloadEl = e; return;
   }
-  for(child of n.childNodes) {
+  for(child of e.childNodes) {
     processFormChild(res, child)
   }
 }
@@ -189,9 +184,9 @@ processFormChild = function(res, n) {
 processForm = function(form) {
   var res = {
     payload: [],
-    sigNode: null, payNode: null,
+    signatureEl: null, payloadEl: null,
   }
-  for(n of form.childNodes) { processFormChild(res, n) }
+  for(e of form.children) { processFormChild(res, e) }
   var hasUuid = false; for(p of res.payload) {
     if(p[0] == 'uuid') { hasUuid = true; break }
   }

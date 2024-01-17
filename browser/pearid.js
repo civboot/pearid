@@ -166,22 +166,17 @@ function setKeysInStorage(keys) {
 // -- Html Processing
 
 // Recursively find the relevant elements
-processFormChild = function(res, n) {
-  var cl = n.classList; if(!cl) {} // skip
+processFormChild = function(res, e) {
+  var cl = e.classList; if(!cl) {} // skip
   else if(cl.contains('pearid-value')) {
-    var name = ""; var val = null
-    for(at of n.attributes) {
-      if(at.nodeName == 'name')  { name = at.nodeValue }
-      if(at.nodeName == 'value') { val =  at.nodeValue }
-    }
-    res.payload.push([name, val])
+    res.payload.push([e.name ? e.name : "", e.value])
     return
   } else if(cl.contains('pearid-signature')) {
-    res.sigNode = n; return;
+    res.signatureEl = e; return;
   } else if(cl.contains('pearid-payload'))   {
-    res.payNode = n; return;
+    res.payloadEl = e; return;
   }
-  for(child of n.childNodes) {
+  for(child of e.childNodes) {
     processFormChild(res, child)
   }
 }
@@ -189,9 +184,9 @@ processFormChild = function(res, n) {
 processForm = function(form) {
   var res = {
     payload: [],
-    sigNode: null, payNode: null,
+    signatureEl: null, payloadEl: null,
   }
-  for(n of form.childNodes) { processFormChild(res, n) }
+  for(e of form.children) { processFormChild(res, e) }
   var hasUuid = false; for(p of res.payload) {
     if(p[0] == 'uuid') { hasUuid = true; break }
   }
@@ -216,17 +211,31 @@ findForms = function() {
 
 const storage = chrome.storage
 const localStorage = storage.local
+const DENIED = 'pearid-denied'
 
 async function pearid(keys) {
   if(!subtle) {
-    log("Subtle crypto not available, pearid exiting")
+    log("pearid: exiting, subtle crypto not available")
     return
   }
+  var id = el('pearid')
+  if (!id || (typeof id.value == 'undefined')) { return }
+  else if (id.value == DENIED) { return; }
+  else if(id.value.trim() != keys.publicKey.trim()) {
+    var msg = "PearID: okay to share your identity?"
+    if(confirm(msg)) { id.value = keys.publicKey }
+    else             { id.value = DENIED; return }
+  }
+  log("finding forms")
   for(form of findForms()) {
-    if(form.payNode) { form.payNode.innerText = form.payload }
-    if(form.sigNode) {
+    log("found form", form)
+    if(form.payloadEl) {
+      log("form payloadEl:", form.payloadEl)
+      form.payloadEl.value = form.payload }
+    if(form.signatureEl) {
+      log("form signatureEl:", form.signatureEl)
       var sig = await sign(form.payload, keys.privateKey)
-      form.sigNode.innerText = sig
+      form.signatureEl.value = sig
     }
   }
 }

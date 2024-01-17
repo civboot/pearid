@@ -166,22 +166,17 @@ function setKeysInStorage(keys) {
 // -- Html Processing
 
 // Recursively find the relevant elements
-processFormChild = function(res, n) {
-  var cl = n.classList; if(!cl) {} // skip
+processFormChild = function(res, e) {
+  var cl = e.classList; if(!cl) {} // skip
   else if(cl.contains('pearid-value')) {
-    var name = ""; var val = null
-    for(at of n.attributes) {
-      if(at.nodeName == 'name')  { name = at.nodeValue }
-      if(at.nodeName == 'value') { val =  at.nodeValue }
-    }
-    res.payload.push([name, val])
+    res.payload.push([e.name ? e.name : "", e.value])
     return
   } else if(cl.contains('pearid-signature')) {
-    res.sigNode = n; return;
+    res.signatureEl = e; return;
   } else if(cl.contains('pearid-payload'))   {
-    res.payNode = n; return;
+    res.payloadEl = e; return;
   }
-  for(child of n.childNodes) {
+  for(child of e.childNodes) {
     processFormChild(res, child)
   }
 }
@@ -189,9 +184,9 @@ processFormChild = function(res, n) {
 processForm = function(form) {
   var res = {
     payload: [],
-    sigNode: null, payNode: null,
+    signatureEl: null, payloadEl: null,
   }
-  for(n of form.childNodes) { processFormChild(res, n) }
+  for(e of form.children) { processFormChild(res, e) }
   var hasUuid = false; for(p of res.payload) {
     if(p[0] == 'uuid') { hasUuid = true; break }
   }
@@ -214,13 +209,39 @@ findForms = function() {
 // pearid test and playground
 // Note: this is stitched with 'lib.js' to create 'pearid_test.js'
 
+function _pearForm(form, elem) {
+  if(elem.classList.contains('pearid-payload')) {
+    form.payload = elem.value
+  } else if(elem.classList.contains('pearid-signature')) {
+    form.signature = elem.value
+  } else {
+    for(ch of elem.children) { _pearForm(form, ch) }
+  }
+}
+function pearForm(formid) {
+  var pearid = el('pearid')
+  if(!pearid) {
+    return "error: no pearid element"
+  }
+  var form = {
+    payload: null,
+    signature: null,
+    pearid: pearid.value,
+  }
+  for(elem of el(formid).children) { _pearForm(form, elem) }
+  return form
+}
+function pearFormButton(formid) {
+  alert(JSON.stringify(pearForm(formid), null, 2))
+}
+
 function loadPublicKey() {
   var fake = el('pearid-fake-public-key'); if(fake) {
     return fake.innerText;
   }
 }
 
-async function loadPrivateKey() {
+function loadPrivateKey() {
   var fake = el('pearid-fake-private-key'); if(fake) {
     return fake.innerText;
   }
@@ -231,7 +252,7 @@ async function showTest() {
   const text = 'The quick brown fox jumps over the lazy dog';
 
   var publicKey = loadPublicKey()
-  var privKey   = await loadPrivateKey()
+  var privKey   = loadPrivateKey()
 
   var s = await sign(text, privKey)
   el('signature').innerHTML = s
@@ -261,7 +282,7 @@ window.onload = async function() {
   log("pearid_test: onload")
   await showTest()
   var publicKey = loadPublicKey()
-  var privKey   = await loadPrivateKey()
+  var privKey   = loadPrivateKey()
 
   await test('framework', async function() {})
   await test('export', async function() {
@@ -286,8 +307,8 @@ window.onload = async function() {
     log('payload', form0.payload)
     assert(form0.payload ===
       '[["inp1","Input to pearid"],["uuid","a-unique-id"]]')
-    assert(form0.payNode)
-    assert(form0.sigNode)
+    assert(form0.payloadEl)
+    assert(form0.signatureEl)
   })
   log("pearid_test: onload done")
 }

@@ -1,13 +1,39 @@
 // pearid test and playground
 // Note: this is stitched with 'lib.js' to create 'pearid_test.js'
 
+function _pearForm(form, elem) {
+  if(elem.classList.contains('pearid-payload')) {
+    form.payload = elem.value
+  } else if(elem.classList.contains('pearid-signature')) {
+    form.signature = elem.value
+  } else {
+    for(ch of elem.children) { _pearForm(form, ch) }
+  }
+}
+function pearForm(formid) {
+  var pearid = el('pearid')
+  if(!pearid) {
+    return "error: no pearid element"
+  }
+  var form = {
+    payload: null,
+    signature: null,
+    pearid: pearid.value,
+  }
+  for(elem of el(formid).children) { _pearForm(form, elem) }
+  return form
+}
+function pearFormButton(formid) {
+  alert(JSON.stringify(pearForm(formid), null, 2))
+}
+
 function loadPublicKey() {
   var fake = el('pearid-fake-public-key'); if(fake) {
     return fake.innerText;
   }
 }
 
-async function loadPrivateKey() {
+function loadPrivateKey() {
   var fake = el('pearid-fake-private-key'); if(fake) {
     return fake.innerText;
   }
@@ -18,7 +44,7 @@ async function showTest() {
   const text = 'The quick brown fox jumps over the lazy dog';
 
   var publicKey = loadPublicKey()
-  var privKey   = await loadPrivateKey()
+  var privKey   = loadPrivateKey()
 
   var s = await sign(text, privKey)
   el('signature').innerHTML = s
@@ -48,7 +74,7 @@ window.onload = async function() {
   log("pearid_test: onload")
   await showTest()
   var publicKey = loadPublicKey()
-  var privKey   = await loadPrivateKey()
+  var privKey   = loadPrivateKey()
 
   await test('framework', async function() {})
   await test('export', async function() {
@@ -73,8 +99,8 @@ window.onload = async function() {
     log('payload', form0.payload)
     assert(form0.payload ===
       '[["inp1","Input to pearid"],["uuid","a-unique-id"]]')
-    assert(form0.payNode)
-    assert(form0.sigNode)
+    assert(form0.payloadEl)
+    assert(form0.signatureEl)
   })
   log("pearid_test: onload done")
 }

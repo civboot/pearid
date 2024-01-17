@@ -93,21 +93,25 @@ function submitForm(id) {
 </script>
 <h2>Form1</h2>
 <form id='play-form1', class='pearid-form'>
-  <div name="inp1" value="Input to pearid" class='pearid-value'>A Div element with value "Input to pearid"</div>
-  <span name="uuid" value="a-unique-id" class='pearid-value'></span>
-  <p><b>Payload:   </b><span class='pearid-payload'>  <i>no payload yet</i>  </span></p>
-  <p><b>Signature: </b><span class='pearid-signature'><i>no signature yet</i></span></p>
+  <input name="inp1" value="Input to pearid" class='pearid-value'></div>
+  <input name="uuid" value="a-unique-id" class='pearid-value'></input>
+  <p><b>Payload: </b>
+  <input class='pearid-payload'></input>
+  <p><b>Signature: </b>
+  <input class='pearid-signature'></input>
 
-  <input type="button" onclick="submitForm('play-form1')" value="Submit">
+  <input type="button" onclick="pearFormButton('play-form1')" value="Submit">
 </form>
 <h2>Form2</h2>
 <form id='play-form2', class='pearid-form'>
-  <input name="user"      value="Alice Bob"  class='pearid-value'></input>
-  <input name="birthdate" value="2001-10-31" class='pearid-value'></input>
-  <span name="uuid" value="a-unique-id" class='pearid-value'></span>
-  <p><b>Payload: </b><span class='pearid-payload'>  <i>no payload yet</i></span></p>
-  <p><b>Signature: </b><span class='pearid-signature'><i>no signature yet</i></span></p>
-  <input type="button" onclick="submitForm('play-form2')" value="Submit">
+  <input name="user"      value="Alice Bob"   class='pearid-value'></input>
+  <input name="birthdate" value="2001-10-31"  class='pearid-value'></input>
+  <input name="uuid"      value="a-unique-id" class='pearid-value'></input>
+  <p><b>Payload: </b>
+  <input class='pearid-payload'></input>
+  <p><b>Signature: </b>
+  <input class='pearid-signature'></input>
+  <input type="button" onclick="pearFormButton('play-form2')" value="Submit">
 </form>
 <h1>Tests</h1>
 <ul id='test-results'></ul>
@@ -120,5 +124,13 @@ function submitForm(id) {
 <h2>Private Key</h2>
 <p><textarea rows="7" cols="70" id="private-key"></textarea>
 
+<h1>Data</h1>
+<b>pearid</b>
+<p><textarea rows="14" cols="70" id="pearid">
+Not a real pearid
+</textarea>
+<input type="button" onclick="submitForm('play-form2')" value="Submit">
+
 </body>
+
 </html>
