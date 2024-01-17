@@ -1,0 +1,13 @@
+PRIVACY POLICY for itsame
+
+The itsame software (browser extension and future software in this
+repository) works by storing data LOCALLY. It will never be shared or
+stored externally by this software in any way.
+
+The LOCAL private key is used to sign payloads in order to prove
+identity (that is the purpose of the application).
+
+Signing a payload is proof of identity. Sending a web request with a
+signed payload means you are prooving your identity to anyone who can
+read that web request. However, those payloads are controlled by the
+webpage, not the itsame software.
