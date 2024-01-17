@@ -18,12 +18,11 @@ const NOID = "noid" // used as value of class=pearid
 const crypto = window.crypto || window.msCrypto;
 const subtle = crypto.subtle
 
-
 // ---------------------------
 // -- Utilities
 
 // encode an ArrayBuffer (of ints) as a base64 String
-function encodeB64(arrayBuffer) {
+const encodeB64 = (arrayBuffer) => {
   var byteArray = new Uint8Array(arrayBuffer)
   var byteString = []
   for (var i=0; i<byteArray.byteLength; i++) {
@@ -33,7 +32,7 @@ function encodeB64(arrayBuffer) {
 }
 
 // decode a base64 String as an ArrayBuffer (of ints)
-function decodeB64(b64str) {
+const decodeB64 = (b64str) => {
   var byteStr = atob(b64str);
   var bytes = new Uint8Array(byteStr.length);
   for (var i = 0; i < byteStr.length; i++) {
@@ -43,7 +42,7 @@ function decodeB64(b64str) {
 }
 
 // remove headers like "-----BEGIN PUBLIC KEY-----" and join lines.
-function unfmtKey(pem) {
+const unfmtKey = (pem) => {
   var lines = pem.split('\n');
   var encoded = []
   for(var i = 0; i < lines.length; i++) {
@@ -54,7 +53,7 @@ function unfmtKey(pem) {
   return encoded.join('')
 }
 
-function fmtKey(header, key) {
+const fmtKey = (header, key) => {
   var lines = [`-----BEGIN ${header} KEY-----`]
   var i = 0; while(i < key.length) {
     lines.push(key.slice(i, i + 64))
@@ -63,6 +62,9 @@ function fmtKey(header, key) {
   lines.push(`-----END ${header} KEY-----`)
   return lines.join('\n')
 }
+
+// ---------------------------
+// -- Crypto Stuff
 
 const RSA_PSS = {
   name: "RSA-PSS",
@@ -79,10 +81,7 @@ const RSA_PSS_PAIR = {
   hash: "SHA-256",
 }
 
-// ---------------------------
-// -- Crypto Stuff
-
-async function importKey_RSA_PSS(key, format, keyUsages) {
+const importKey_RSA_PSS = async (key, format, keyUsages) => {
   var cleanKey = unfmtKey(key)
 
   try {
@@ -93,29 +92,29 @@ async function importKey_RSA_PSS(key, format, keyUsages) {
       true,
       keyUsages);
   } catch(e) {
-    console.error(`${e}: ${e.message} ${e.lineNumber}`)
+    loge(e)
     throw e
   }
 }
 
 // spki is public only
-async function importVerifyingKey(key) {
+const importVerifyingKey = async (key) => {
   return importKey_RSA_PSS(key, "spki", ["verify"])
 }
-async function importSigningKey(key) {
+const importSigningKey = async (key) => {
   return importKey_RSA_PSS(key, "pkcs8", ["sign"])
 }
 
-async function exportPublicKey(verifyingKey) {
+const exportPublicKey = async (verifyingKey) => {
   var exported = await subtle.exportKey("spki", verifyingKey)
   return fmtKey("PUBLIC", encodeB64(exported))
 }
-async function exportPrivateKey(signingKey) {
+const exportPrivateKey = async (signingKey) => {
   var exported = await subtle.exportKey("pkcs8", signingKey)
   return fmtKey("PRIVATE", encodeB64(exported))
 }
 
-async function createKeyPair() {
+const createKeyPair = async() => {
   var pair = await subtle.generateKey(
     RSA_PSS_PAIR, true, ["sign", "verify"])
   return {
@@ -125,10 +124,10 @@ async function createKeyPair() {
 }
 
 
-sign = async function(text, privateKey) {
+const sign = async(text, privateKey) => {
   var key; try { key = await importSigningKey(privateKey)
   } catch(e) {
-    console.error('failed to load private key: ' + e, e.stack)
+    loge(e)
     throw e
   }
 
@@ -139,7 +138,7 @@ sign = async function(text, privateKey) {
   return encodeB64(signatureBuf)
 }
 
-verify = async function(text, signature, publicKey) {
+verify = async (text, signature, publicKey) => {
   const key = await importVerifyingKey(publicKey)
   return await subtle.verify(
     RSA_PSS_PARAMS,
@@ -151,13 +150,13 @@ verify = async function(text, signature, publicKey) {
 // ---------------------------
 // -- Load / Store
 
-function getKeysFromStorage() {
+getKeysFromStorage = () => {
   return new Promise((resolve) => {
     chrome.storage.local.get({ privateKey: '', publicKey: ''}, resolve)
   })
 }
 
-function setKeysInStorage(keys) {
+setKeysInStorage = () => {
   return new Promise((resolve) => {
     chrome.storage.local.set(keys, resolve)
   })
@@ -167,9 +166,11 @@ function setKeysInStorage(keys) {
 // -- Html Processing
 
 // Recursively find the relevant elements
-processFormChild = function(res, e) {
+// res: result created in processForm, e: element
+processFormChild = (res, e) => {
   var cl = e.classList; if(!cl) {} // skip
   else if(cl.contains('pearid-value')) {
+    res.valueEls.push(e)
     res.payload.push([e.name ? e.name : "", e.value])
     return
   } else if(cl.contains('pearid-signature')) {
@@ -182,11 +183,12 @@ processFormChild = function(res, e) {
   }
 }
 
-processForm = function(form) {
+processForm = (form) => {
   var res = {
     payload: [],
-    signatureEl: null, payloadEl: null,
+    signatureEl: null, payloadEl: null, valueEls: [],
   }
+
   for(e of form.children) { processFormChild(res, e) }
   var hasUuid = false; for(p of res.payload) {
     if(p[0] == 'uuid') { hasUuid = true; break }
@@ -198,13 +200,59 @@ processForm = function(form) {
   return res
 }
 
-findForms = function() {
+findForms = () => {
   var forms = []
   for(form of document.getElementsByClassName('pearid-form')) {
     var form = processForm(form)
     forms.push(form)
   }
   return forms
+}
+
+const updateSignatures = async (_ev) => {
+  if(!subtle) {
+    log("pearid: exiting, subtle crypto not available")
+    return
+  }
+  var id = el('pearid')
+  log('got pearid: ', id.value, 'el=', id)
+  if (!id
+      || (typeof id.value == 'undefined')
+      || (id.value.trim() == NOID)) { return }
+
+  let keys = await getKeysFromStorage()
+  if(id.value.trim() != keys.publicKey.trim()) {
+    var msg = "PearID: okay to share your identity with webpage?"
+    if(confirm(msg)) { id.value = keys.publicKey }
+    else             { id.value = NOID; return }
+  }
+  log("finding forms")
+  for(form of findForms()) {
+    log("found form", form)
+    if(form.payloadEl) {
+      log("form payloadEl:", form.payloadEl)
+      form.payloadEl.value = form.payload }
+    if(form.signatureEl) {
+      log("form signatureEl:", form.signatureEl)
+      var sig = await sign(form.payload, keys.privateKey)
+      form.signatureEl.value = sig
+    }
+  }
+}
+
+// Add listeners to id=pearid and the class=pearid-value elements.
+//
+// Whenever they change they cause a global resign
+const addChangeListeners = () => {
+  if(!subtle) { return }
+  var pearid = el('pearid'); if(!pearid) { return }
+  pearid.addEventListener('change', updateSignatures)
+
+  for(form of findForms()) {
+    for(valueEl of form.valueEls) {
+      valueEl.addEventListener('change', updateSignatures)
+    }
+  }
 }
 
 generateOptions = async function() {

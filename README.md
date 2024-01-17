@@ -12,13 +12,13 @@
 >
 > **DO NOT USE THIS SOFTWARE FOR ANY CRITICAL DATA OR SERVICES**
 
-pearid (Pear ID) is a simple standard for proving your identity with web (or other)
+pearid (Pear Id) is a simple standard for proving your identity with web (or other)
 servers. It is designed to be easy to both implement for and use. It includes a
 browser extension which allows ultra-lightweight identity verification for the
 web and beyond. Other libraries will likely be provided and/or linked in the
 future.
 
-PearID is part of the [Civboot.org][civboot] tech stack and is designed to meet
+PearId is part of the [Civboot.org][civboot] tech stack and is designed to meet
 the complete identity and verification requirements of Civboot collaborative
 software.
 
@@ -75,6 +75,19 @@ extension.
 For example, a page with:
 
 ```html
+<!-- Triggers the extension to set the pear id
+  (after confirming from user) -->
+<textarea rows="1" cols="6" id="pearid">noid</textarea>
+<button onclick="
+  let e = document.getElementById('pearid')
+  e.value = ''; e.dispatchEvent(new Event('change'));
+">Get PearId</button>
+
+<!-- Typical pearid form
+  The pearid-payload and pearid-signature fields are populated
+  by the extension when 'change' events trigger on any
+  of the pearid-value elements.
+-->
 <form id='user-form', class='pearid-form'>
   <input name="user"      value="Alice Bob"   class='pearid-value'></input>
   <input name="birthdate" value="2001-10-31"  class='pearid-value'></input>
@@ -85,21 +98,29 @@ For example, a page with:
   <input class='pearid-signature'></input>
   <input type="button" onclick="pearFormButton('user-form')" value="Submit">
 </form>
-<p><textarea rows="1" cols="5" id="pearid"></textarea>
+
 ```
 
-Will have the `pearid-payload` element`'s innerText set to:
+When first loaded, the extension will do nothing because the `id=pearid` element
+has `value=noid`. Clicking the `Get PearId` button will clear this field and
+cause the PearId extension to fill it with your Pear Id (your public key). The
+server can then use this to identify you (look up your "username" that they have
+stored) as well as verify the signatures generated.
+
+On page load (and any changes to `pearid-value` elements), the page's
+`pearid-payload` value/s will updated and the `pearid-signature` value/s to the
+signature of each form's payload signed using your private key.
+
+For example, the values shown above results in the following payload:
+
 ```
 [["user","Alice Bob"],["birthdate","2001-10-31"],["uuid","a-unique-id"]]
 ```
 
-The `pearid-signature` element will be set to the signature of the payload signed using your private key.
-
-Finally the `pearid` will be populated with your public key (pearid), and can be
-used by the server to identify you.
-
 When the user hits `submit`, the `submitForm` javascript will see the updated
-payload, signature and id; which they then send to the server.
+payload, signature and PearId; which they then send to the server which should
+validate the uuid and ACL the PearId (lookup the public key hash for the user
+authorizations).
 
 ## Webpage / Server Requirements
 Designing a webpage to interact with the pearid extension is easy.
@@ -128,24 +149,34 @@ receive in the payload is the same as the uuid they gave.
 ### Login Flow
 
 A server/webpage can create a login flow with only a few html elements and a
-tiny amount of javascript+server logic:
+tiny amount of javascript+server logic
 
-1. The `class=pearid` element should be hidden (with some other indication that
-   the user is not "logged in") with a default value of `"noid"`. If it is any
-   other value, the extension will launch an alert asking the user if they want
-   to inject their `pearid`, which you likely don't want on every page load.
-2. A button should exist called `Get PearID` which simply clears the
-   `id=pearid` element. This will trigger the extension to launch an alert
-   to fill the id.
-3. You likely want to a `Login` button next to `Get PearID`. This should send
-   a request to the server with the user's `PearID` and return a url with their
-   id as an attribute (`?userid=12345`). The http with the userid set should
-   pre-populate the `id=pearid` to the that user's pear id, as well as fill
-   in other user-specific details (i.e. their username).
+1. The `id=pearid` (see example) element should be hidden (with some other
+   indication that the user is not "logged in") with a default value of
+   `"noid"`. If it is any other value, the extension will launch an alert asking
+   the user if they want to inject their `pearid`, which you likely don't want
+   on every page load.
 
+2. A button should exist called `Get PearId` (see example) which simply clears
+   the `id=pearid` element and triggers a `change` event on the `id=pearid`.
+   This will trigger the extension to launch an alert and fill the id and
+   signatures.
+
+3. You likely want to a `Login` button next to `Get PearId`. This should send
+   a request to the server with the user's `PearId` and return a url with their
+   id as an attribute (`http://myserver.com?userid=12345`). The user can then
+   use this url to "login" to your web-app and view pages with their PearId
+   pre-populated as well as other user-specific information (i.e. their
+   username).
+
+> Note with the above scheme that it is trivial to impersonate VIEWING as any
+> user, since you would only need the url attribute. PairID is only for ensuring
+> valid mutations to the server, not for restricting what can be viewed.
+> Anything requiring privacy should develop their own standard (although that
+> standard COULD possibly use the private PairId key for encryption).
 
 ## Development Notes
-Testing is done locally by 
+Testing is done locally by:
 
 * loading the extension from the directory
 * running `browser/make.lua` and opening
@@ -166,6 +197,5 @@ This software is released into the public domain, see LICENSE (aka UNLICENSE).
 
 This software is part of the Civboot.org tech stack. Attribution is appreciated
 but not required.
-
 
 [civboot]: http://civboot.org

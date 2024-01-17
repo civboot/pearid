@@ -33,7 +33,8 @@ function pearFormButton(formid) {
 
 async function showTest() {
   // some plaintext you want to sign
-  const text = 'The quick brown fox jumps over the lazy dog';
+  const text = el('show-text').value
+  log('showTest text: ' + text)
 
   var publicKey = loadPublicKey()
   var privKey   = loadPrivateKey()
@@ -44,6 +45,7 @@ async function showTest() {
   var v = await verify(text, s, publicKey)
   el('verified').innerHTML = v + ''
 }
+
 
 async function test(name, fn) {
   log('TEST:', name)
@@ -61,10 +63,12 @@ generateOptions = async function() {
 }
 
 window.onload = async function() {
+  showTest()
+  el('show-text').addEventListener('change', showTest)
+
   document.getElementById('generate').addEventListener('click', generateOptions);
 
   log("pearid_test: onload")
-  await showTest()
   var publicKey = loadPublicKey()
   var privKey   = loadPrivateKey()
 

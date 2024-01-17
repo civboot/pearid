@@ -4,17 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>pearid testing</title>
-  <!--<link rel="stylesheet" href="style.css">-->
 </head>
 <body>
 <script src="pearid_test.js"></script>
 
 <h1>Pear ID Tests</h1>
 
+Click to "login" with your browser
+
+<p>
+<!-- Note: textarea.value is INSIDE it, unlike literally
+  every other input! -->
+<textarea rows="1" cols="6" id="pearid">noid</textarea>
+<button onclick="
+  let e = document.getElementById('pearid')
+  e.value = ''; e.dispatchEvent(new Event('change'));
+  ">
+  Get PearId
+</button>
+
 <h2>Page show and tell</h2>
 The page uses fake keys to calculate and populate these.
 "hello world" of signatures.
 
+<!-- this is manually listned to in test.js -->
+<p><input
+  id="show-text" size="100"
+  value="The quick brown fox jumps over the lazy dog"
+></input>
+
+<!-- a method is hand-crafted to update these signatures --!>
 <p><b>Signature:</b> <span id='signature'></span></p>
 <p><b>Verfied: <span id='verified'></span></b><p>
 
@@ -49,11 +68,6 @@ extension.
   <input class='pearid-signature'></input>
   <input type="button" onclick="pearFormButton('play-form2')" value="Submit">
 </form>
-<b>pearid</b> the id=pearid that gets populated after the user is prompted
-for their identity.
-<p><textarea rows="14" cols="70" id="pearid">
-Not a real pearid
-</textarea>
 <input type="button" onclick="submitForm('user-form')" value="Submit">
 
 <h2>Generate Keys</h2>
