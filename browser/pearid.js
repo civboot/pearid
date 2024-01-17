@@ -14,6 +14,7 @@ function loge(error) {
   log(`ERROR ${error}, stack: ${error.stack}`)
 }
 
+const NOID = "noid" // used as value of class=pearid
 const crypto = window.crypto || window.msCrypto;
 const subtle = crypto.subtle
 
@@ -211,7 +212,6 @@ findForms = function() {
 
 const storage = chrome.storage
 const localStorage = storage.local
-const DENIED = 'pearid-denied'
 
 async function pearid(keys) {
   if(!subtle) {
@@ -220,11 +220,11 @@ async function pearid(keys) {
   }
   var id = el('pearid')
   if (!id || (typeof id.value == 'undefined')) { return }
-  else if (id.value == DENIED) { return; }
+  else if (id.value == NOID) { return; }
   else if(id.value.trim() != keys.publicKey.trim()) {
     var msg = "PearID: okay to share your identity?"
     if(confirm(msg)) { id.value = keys.publicKey }
-    else             { id.value = DENIED; return }
+    else             { id.value = NOID; return }
   }
   log("finding forms")
   for(form of findForms()) {

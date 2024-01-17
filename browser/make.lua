@@ -11,11 +11,12 @@ local function writepath(path, text)
 end
 
 local function main()
+  local fake    = readpath'fake_keys.js'
   local lib     = readpath'lib.js'
   local test    = readpath'test.js'
   local ext     = readpath'ext.js'
   local options = readpath'options.js'
-  writepath('pearid_test.js',    lib..'\n'..test)
+  writepath('pearid_test.js',    lib..'\n'..fake..'\n'..test)
   writepath('pearid.js',         lib..'\n'..ext)
   writepath('pearid_options.js', lib..'\n'..options)
 end

@@ -14,6 +14,7 @@ function loge(error) {
   log(`ERROR ${error}, stack: ${error.stack}`)
 }
 
+const NOID = "noid" // used as value of class=pearid
 const crypto = window.crypto || window.msCrypto;
 const subtle = crypto.subtle
 

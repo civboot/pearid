@@ -1,5 +1,9 @@
 // pearid test and playground
-// Note: this is stitched with 'lib.js' to create 'pearid_test.js'
+// Note: this is stitched with 'lib.js' and 'fake_keys.js' to create 'pearid_test.js'
+
+// see fake_keys.js (make.lua)
+function loadPublicKey() { return PUBLIC_KEY }
+function loadPrivateKey() { return PRIVATE_KEY }
 
 function _pearForm(form, elem) {
   if(elem.classList.contains('pearid-payload')) {
@@ -25,18 +29,6 @@ function pearForm(formid) {
 }
 function pearFormButton(formid) {
   alert(JSON.stringify(pearForm(formid), null, 2))
-}
-
-function loadPublicKey() {
-  var fake = el('pearid-fake-public-key'); if(fake) {
-    return fake.innerText;
-  }
-}
-
-function loadPrivateKey() {
-  var fake = el('pearid-fake-private-key'); if(fake) {
-    return fake.innerText;
-  }
 }
 
 async function showTest() {
@@ -102,6 +94,7 @@ window.onload = async function() {
     assert(form0.payloadEl)
     assert(form0.signatureEl)
   })
+  await test('ALL PASS', async function() {})
   log("pearid_test: onload done")
 }
 

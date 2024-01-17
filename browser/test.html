@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pearid testing</title>
+  <!--<link rel="stylesheet" href="style.css">-->
+</head>
+<body>
+<script src="pearid_test.js"></script>
+
+<h1>Pear ID Tests</h1>
+
+<h2>Page show and tell</h2>
+The page uses fake keys to calculate and populate these.
+"hello world" of signatures.
+
+<p><b>Signature:</b> <span id='signature'></span></p>
+<p><b>Verfied: <span id='verified'></span></b><p>
+
+<h2>Tests</h2>
+test.js adds to this list
+
+<ul id='test-results'></ul>
+
+<h2>Extension Playing</h2>
+These are not modified by test.js but will be modified by an installed
+extension.
+
+<h3>Form1</h3>
+<form id='play-form1', class='pearid-form'>
+  <input name="inp1" value="Input to pearid" class='pearid-value'></div>
+  <input name="uuid" value="a-unique-id" class='pearid-value'></input>
+  <p><b>Payload: </b>
+  <input class='pearid-payload'></input>
+  <p><b>Signature: </b>
+  <input class='pearid-signature'></input>
+
+  <input type="button" onclick="pearFormButton('play-form1')" value="Submit">
+</form>
+<h3>Form2</h3>
+<form id='play-form2', class='pearid-form'>
+  <input name="user"      value="Alice Bob"   class='pearid-value'></input>
+  <input name="birthdate" value="2001-10-31"  class='pearid-value'></input>
+  <input name="uuid"      value="a-unique-id" class='pearid-value'></input>
+  <p><b>Payload: </b>
+  <input class='pearid-payload'></input>
+  <p><b>Signature: </b>
+  <input class='pearid-signature'></input>
+  <input type="button" onclick="pearFormButton('play-form2')" value="Submit">
+</form>
+<b>pearid</b> the id=pearid that gets populated after the user is prompted
+for their identity.
+<p><textarea rows="14" cols="70" id="pearid">
+Not a real pearid
+</textarea>
+<input type="button" onclick="submitForm('user-form')" value="Submit">
+
+<h2>Generate Keys</h2>
+Demonstrate generating keypairs (to test options.js)
+<p><button id="generate">Generate Keypair</button>
+<p><b>Generated Public Key</b>
+<p><textarea rows="14" cols="70" id="public-key"></textarea>
+
+<p><b>Generated Private Key</b>
+<p><textarea rows="7" cols="70" id="private-key"></textarea>
+
+</body>
+</html>

@@ -1,14 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>pearid playground</title>
-  <!--<link rel="stylesheet" href="style.css">-->
-</head>
-<body>
-<script src="pearid_test.js"></script>
-<script type="data" id="pearid-fake-private-key">
+
+PUBLIC_KEY = `
+-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAtzcl8NAgurtbeEajVv/+
+r+mIV/OhCFIC71PnMljUrlNSoOBqiza9B99gUNX/mBudt/Cyrfs23L1Coo5jqRpe
+VN/LIIuk0Hf63z6fOVYVS1ucQ/zMSwz1356UpckoxUm5mQ8/yqhOJNwn/1waJb8S
+DTKrN6/uI/zTEbV5y4/fM3NNBeDRSlt0Lf4QoywjJLgPkpnVzkElrUUX+uUrIvbw
+mA7fFc96efo9i9zej7uyND9hVPuPRoJqIEfEfN6dEDNA3T0EKE6soXujPMhvBxz2
+bfvNoY4DWWdXDOfHkub7cwo4wLUTnl9kRVZTA/y8IS+S9jnMNrvucuXqNirFq3Ef
+KnD7VqWKm87ljd5N9Wb3ZKQRboDQsgCcqvINHCrjckFL9BF/ZJc40q3W83svqm8j
+pMcjkU6whpKjJKEqiQvg7Sn0mbnlHcyBIFfcT2ZFWK+I65WmRx2VZ4qtTpnwIJy5
+I3IIDDZ166KBG7waJjgokOZu5wvIuZU5jz28qxKhLVi7u4nhLIVhxBrDcbBe7NYI
+U4+XMswGxe+PPqWRUYH3VtcE/zo+0vcvbKX10n96lPSphyNb24Vix3r+omUgmd7C
+b7SvWBm1kOFeP5QTMcxSqgAinfuR2wXrzoNmRseWO9W5NY1Aaz4fcjAAOuzTlAE1
+YjdzufQ1pWUZfJ7UazSFbeECAwEAAQ==
+-----END PUBLIC KEY-----
+`
+
+PRIVATE_KEY = `
 -----BEGIN PRIVATE KEY-----
 MIIJQgIBADANBgkqhkiG9w0BAQEFAASCCSwwggkoAgEAAoICAQC3NyXw0CC6u1t4
 RqNW//6v6YhX86EIUgLvU+cyWNSuU1Kg4GqLNr0H32BQ1f+YG5238LKt+zbcvUKi
@@ -61,76 +69,4 @@ evKrqdxSnETo8aVLU0p74fWeyEXLooMQtS+RMPiwt575ASsFwocRMJ+qib1b1lsV
 S8D+PjBb3f6SiWrJY5vyQSnRWaPiwdFzM7lKtk6TS/boNzmUTfUtN6InuvcrdILl
 e+7x3qE0VcHyFIvH3hW1NQLhuLVmOQ==
 -----END PRIVATE KEY-----
-</script>
-<h1>Example public key</h1>
-<script type="data" id="pearid-fake-public-key">
------BEGIN PUBLIC KEY-----
-MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAtzcl8NAgurtbeEajVv/+
-r+mIV/OhCFIC71PnMljUrlNSoOBqiza9B99gUNX/mBudt/Cyrfs23L1Coo5jqRpe
-VN/LIIuk0Hf63z6fOVYVS1ucQ/zMSwz1356UpckoxUm5mQ8/yqhOJNwn/1waJb8S
-DTKrN6/uI/zTEbV5y4/fM3NNBeDRSlt0Lf4QoywjJLgPkpnVzkElrUUX+uUrIvbw
-mA7fFc96efo9i9zej7uyND9hVPuPRoJqIEfEfN6dEDNA3T0EKE6soXujPMhvBxz2
-bfvNoY4DWWdXDOfHkub7cwo4wLUTnl9kRVZTA/y8IS+S9jnMNrvucuXqNirFq3Ef
-KnD7VqWKm87ljd5N9Wb3ZKQRboDQsgCcqvINHCrjckFL9BF/ZJc40q3W83svqm8j
-pMcjkU6whpKjJKEqiQvg7Sn0mbnlHcyBIFfcT2ZFWK+I65WmRx2VZ4qtTpnwIJy5
-I3IIDDZ166KBG7waJjgokOZu5wvIuZU5jz28qxKhLVi7u4nhLIVhxBrDcbBe7NYI
-U4+XMswGxe+PPqWRUYH3VtcE/zo+0vcvbKX10n96lPSphyNb24Vix3r+omUgmd7C
-b7SvWBm1kOFeP5QTMcxSqgAinfuR2wXrzoNmRseWO9W5NY1Aaz4fcjAAOuzTlAE1
-YjdzufQ1pWUZfJ7UazSFbeECAwEAAQ==
------END PUBLIC KEY-----
-</script>
-
-<h1>Direct (fake) Tests</h1>
-<h2>Signature</h2>
-<p><span id='signature'></span></p>
-<p><b>Verfied: <span id='verified'></span></b><p>
-
-<h1>Extension Playing</h1>
-<script>
-function submitForm(id) {
-  alert(document.getElementById(id).innerHTML + '')
-}
-</script>
-<h2>Form1</h2>
-<form id='play-form1', class='pearid-form'>
-  <input name="inp1" value="Input to pearid" class='pearid-value'></div>
-  <input name="uuid" value="a-unique-id" class='pearid-value'></input>
-  <p><b>Payload: </b>
-  <input class='pearid-payload'></input>
-  <p><b>Signature: </b>
-  <input class='pearid-signature'></input>
-
-  <input type="button" onclick="pearFormButton('play-form1')" value="Submit">
-</form>
-<h2>Form2</h2>
-<form id='play-form2', class='pearid-form'>
-  <input name="user"      value="Alice Bob"   class='pearid-value'></input>
-  <input name="birthdate" value="2001-10-31"  class='pearid-value'></input>
-  <input name="uuid"      value="a-unique-id" class='pearid-value'></input>
-  <p><b>Payload: </b>
-  <input class='pearid-payload'></input>
-  <p><b>Signature: </b>
-  <input class='pearid-signature'></input>
-  <input type="button" onclick="pearFormButton('play-form2')" value="Submit">
-</form>
-<h1>Tests</h1>
-<ul id='test-results'></ul>
-
-<h1>Generate Keys</h1>
-<button id="generate">Generate Keypair</button>
-<h2>Public Key</h2>
-<p><textarea rows="14" cols="70" id="public-key"></textarea>
-
-<h2>Private Key</h2>
-<p><textarea rows="7" cols="70" id="private-key"></textarea>
-
-<h1>Data</h1>
-<b>pearid</b>
-<p><textarea rows="14" cols="70" id="pearid">
-Not a real pearid
-</textarea>
-<input type="button" onclick="submitForm('play-form2')" value="Submit">
-
-</body>
-
-</html>
+`
