@@ -1,27 +1,27 @@
-# itsame: tell servers it's you with a private key
+# pearid: id authentication using a public/private keypair
 
 > **WARNING:** This extension is in pre-alpha and uses cryptographic technology
 > in a reasonably user-friendly way. However, the author is not a security
 > engineer and the software has not (yet) been verified by any security
 > engineers.
 >
-> The "itsame" standard and browser extension comes with no warranty of any kind
+> The "pearid" standard and browser extension comes with no warranty of any kind
 > (see LICENSE). It is currently made available mostly so that folks can
 > experiment, think and review the concepts in order to create a simple and
 > robust authentication scheme in the future.
 >
 > **DO NOT USE THIS SOFTWARE FOR ANY CRITICAL DATA OR SERVICES**
 
-itsame ("It's-a-me") is a simple encoding standard for proving your identity.
-It is designed to be easy for anyone to implement anywhere (either on a webpage
-or an alternative server).
-
-It includes a browser extension which webpages can target to offer
-ultra-lightweight identity verification for the web and beyond.
+pearid (Pear ID) is a simple standard for proving your identity with web (or other)
+servers. It is designed to be easy to both implement for and use. It includes a
+browser extension which allows ultra-lightweight identity verification for the
+web and beyond. Other libraries will likely be provided and/or linked in the
+future.
 
 ![icon](./browser/icon128.png)
 
-_([icon source](https://publicdomainvectors.org/en/free-clipart/Yin-Yang-lotus/82377.html))_
+_([icon
+source](https://publicdomainvectors.org/en/free-clipart/Pear-vector-clip-art/5832.html))_
 
 ## Getting Started (Browser Extension)
 
@@ -29,45 +29,45 @@ Create a private/public keypair
 
 ```
 mkdir -p ~/.secrets/
-openssl genrsa -out ~/.secrets/itsame.secret 4096
-openssl rsa -in itsame.secret -pubout > ~/.secrets/itsame.public
+openssl genrsa -out ~/.secrets/pear.secret 4096
+openssl rsa -in pear.secret -pubout > ~/.secrets/pear.public
 ```
 
-Your `itsame.public` file should be shared with the servers/websites you want to
+Your `pear.public` file should be shared with the servers/websites you want to
 access with your identity (i.e. by sending the administrator an email, opening
 an issue, etc). It is public, it doesn't really matter who has it.
 
-Your `itsame.secret` file should be kept secret. If anyone has access to it
+Your `pear.secret` file should be kept secret. If anyone has access to it
 they will be able to impersonate you on whatever servers you've registered with.
 
 * **DON'T** share it with anyone you don't share your bank account with, and
   consider keeping it secret from them too.
-* **DO** load it into your itsame browser extension to sign request payloads
+* **DO** load it into your pearid browser extension to sign request payloads
 * **DO** load it into applications you trust in order to sign request payloads
 * **MAYBE** make a physical backup of it on a few USB sticks and put them in a
   safe place... or if you loose the key just generate a new one -- but you'll
   have to re-register with all the servers you registered with.
 
 ## Browser Extension
-[browser/itsame.js](./browser/itsame.js) contains a browser extension which
+[browser/pearid.js](./browser/pearid.js) contains a browser extension which
 automatically signs (injects a signature) elements containing
-`class='itsame-form'`. It requires the user to copy their signature into the
+`class='pearid-form'`. It requires the user to copy their signature into the
 extension.
 
 For example, a page with:
 
 ```html
-<form id='my-form', class='itsame-form'>
-  <input name="user"      value="Alice Bob"  class='itsame-value'></input>
-  <input name="birthdate" value="2001-10-31" class='itsame-value'></input>
-  <span name="uuid" value="a-unique-id" class='itsame-value'></span>
-  <p><b>Payload: </b><span requestid="1234" class='itsame-payload'>  <i>no payload yet</i></span></p>
-  <p><b>Signature: </b><span class='itsame-signature'><i>no signature yet</i></span></p>
+<form id='my-form', class='pearid-form'>
+  <input name="user"      value="Alice Bob"  class='pearid-value'></input>
+  <input name="birthdate" value="2001-10-31" class='pearid-value'></input>
+  <span name="uuid" value="a-unique-id" class='pearid-value'></span>
+  <p><b>Payload: </b><span requestid="1234" class='pearid-payload'>  <i>no payload yet</i></span></p>
+  <p><b>Signature: </b><span class='pearid-signature'><i>no signature yet</i></span></p>
   <input type="button" onclick="submitForm('play-form2')" value="Submit">
 </form>
 ```
 
-Will have the `itsame-payload` element`'s innerText set to:
+Will have the `pearid-payload` element`'s innerText set to:
 ```
 [["user","Alice Bob"],["birthdate","2001-10-31"],["uuid","a-unique-id"]]
 ```
@@ -94,8 +94,8 @@ someone in possession of the private key.
 * Allow creation of private keys from within the extension
 
 ## Development Notes
-Testing is done locally by running `itsame/browser/make.lua` and opening
-`file://path/to/itsame/browser/play.html` in a browser with the extension
+Testing is done locally by running `pearid/browser/make.lua` and opening
+`file://path/to/pearid/browser/play.html` in a browser with the extension
 loaded. This "unit tests" internal logic and also allows the extension to
 perform it's signature injection, as well as see that button presses populate
 the javascript world.

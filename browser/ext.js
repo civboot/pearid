@@ -1,5 +1,5 @@
 // extension
-// Note: this is stitched with 'lib.js' to create 'itsame.js'
+// Note: this is stitched with 'lib.js' to create 'pearid.js'
 
 const storage = chrome.storage
 const localStorage = storage.local
@@ -14,9 +14,9 @@ function privateFromStorage() {
   })
 }
 
-async function itsame(privateKey) {
+async function pearid(privateKey) {
   if(!subtle) {
-    log("Subtle crypto not available, itsame exiting")
+    log("Subtle crypto not available, pearid exiting")
     return
   }
   for(form of findForms()) {
@@ -29,5 +29,5 @@ async function itsame(privateKey) {
 }
 
 privateFromStorage()
-  .then(itsame)
+  .then(pearid)
   .catch(console.error)

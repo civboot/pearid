@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>itsame Extension Options</title>
+    <title>pearid Extension Options</title>
   </head>
   <body>
     <h2>Private Key</h2>
     <p><b>Do not share this value with anyone.</b>
-    <p>Your private key is used to fill out <i>itsame-signature</i> fields in
+    <p>Your private key is used to fill out <i>pearid-signature</i> fields in
     pages you visit. The pages can then use your public key to verify you
     created the content. 
     <p><textarea rows="12" cols="70" id="private-key"></textarea>
@@ -18,8 +18,8 @@
     <p>On linux you can generate this value with:</p>
     <pre>
 mkdir -p ~/.secrets/
-openssl genrsa -out ~/.secrets/itsame.secret 4096
-openssl rsa -in itsame.secret -pubout &gt; ~/.secrets/itsame.public
+openssl genrsa -out ~/.secrets/pearid.secret 4096
+openssl rsa -in pearid.secret -pubout &gt; ~/.secrets/pearid.public
     </pre>
 
     <div id="status"></div>

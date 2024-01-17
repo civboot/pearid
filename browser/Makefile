@@ -1,4 +1,4 @@
 
 zip:
-	rm -f /tmp/itsame.zip
-	zip /tmp/itsame.zip manifest.json icon* itsame.js options*
+	rm -f /tmp/pearid.zip
+	zip /tmp/pearid.zip manifest.json icon* pearid.js options*

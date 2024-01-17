@@ -2,10 +2,10 @@
   "author": {
     "email": "vitiral@gmail.com"
   },
-  "homepage_url": "http://github.com/civboot/itsame",
-  "description": "tell webpages it's you with a private key",
+  "homepage_url": "http://github.com/civboot/pearid",
+  "description": "id authentication using a public/private keypair",
   "manifest_version": 3,
-  "name": "itsame",
+  "name": "pearid",
   "version": "0.1.1",
   "permissions": [
     "storage"
@@ -16,7 +16,7 @@
       "matches": [
         "<all_urls>"
       ],
-      "js": ["itsame.js"]
+      "js": ["pearid.js"]
     }
   ],
   "icons": {

@@ -1,5 +1,5 @@
 // Note: lib.js is stitched with ext.js and test.js to create
-// itsame.js and itsame_test.js.
+// pearid.js and pearid_test.js.
 // Why? Because I can't figure out way to import javascript
 // in the file:// API (no, script<type="module">) does NOT work,
 // and subtle doesn't exist if you are running an HTTP server.
@@ -136,7 +136,7 @@ verify = async function(text, signature, publicKey) {
 // Recursively find the relevant elements
 processFormChild = function(res, n) {
   var cl = n.classList; if(!cl) {} // skip
-  else if(cl.contains('itsame-value')) {
+  else if(cl.contains('pearid-value')) {
     var name = ""; var val = null
     for(at of n.attributes) {
       if(at.nodeName == 'name')  { name = at.nodeValue }
@@ -144,9 +144,9 @@ processFormChild = function(res, n) {
     }
     res.payload.push([name, val])
     return
-  } else if(cl.contains('itsame-signature')) {
+  } else if(cl.contains('pearid-signature')) {
     res.sigNode = n; return;
-  } else if(cl.contains('itsame-payload'))   {
+  } else if(cl.contains('pearid-payload'))   {
     res.payNode = n; return;
   }
   for(child of n.childNodes) {
@@ -164,7 +164,7 @@ processForm = function(form) {
     if(p[0] == 'uuid') { hasUuid = true; break }
   }
   if(!hasUuid) {
-    throw new Error('invalid page: missing name="uuid" itsame-value in itsame-form')
+    throw new Error('invalid page: missing name="uuid" pearid-value in pearid-form')
   }
   res.payload = JSON.stringify(res.payload)
   return res
@@ -172,7 +172,7 @@ processForm = function(form) {
 
 findForms = function() {
   var forms = []
-  for(form of document.getElementsByClassName('itsame-form')) {
+  for(form of document.getElementsByClassName('pearid-form')) {
     var form = processForm(form)
     forms.push(form)
   }
@@ -180,7 +180,7 @@ findForms = function() {
 }
 
 // extension
-// Note: this is stitched with 'lib.js' to create 'itsame.js'
+// Note: this is stitched with 'lib.js' to create 'pearid.js'
 
 const storage = chrome.storage
 const localStorage = storage.local
@@ -195,9 +195,9 @@ function privateFromStorage() {
   })
 }
 
-async function itsame(privateKey) {
+async function pearid(privateKey) {
   if(!subtle) {
-    log("Subtle crypto not available, itsame exiting")
+    log("Subtle crypto not available, pearid exiting")
     return
   }
   for(form of findForms()) {
@@ -210,5 +210,5 @@ async function itsame(privateKey) {
 }
 
 privateFromStorage()
-  .then(itsame)
+  .then(pearid)
   .catch(console.error)

@@ -1,14 +1,14 @@
-// itsame test and playground
-// Note: this is stitched with 'lib.js' to create 'itsame_test.js'
+// pearid test and playground
+// Note: this is stitched with 'lib.js' to create 'pearid_test.js'
 
 function loadPublicKey() {
-  var fake = el('itsame-fake-public-key'); if(fake) {
+  var fake = el('pearid-fake-public-key'); if(fake) {
     return fake.innerText;
   }
 }
 
 async function loadPrivateKey() {
-  var fake = el('itsame-fake-private-key'); if(fake) {
+  var fake = el('pearid-fake-private-key'); if(fake) {
     return fake.innerText;
   }
 }
@@ -36,7 +36,7 @@ async function test(name, fn) {
 }
 
 window.onload = async function() {
-  log("itsame_test: onload")
+  log("pearid_test: onload")
   await showTest()
   var publicKey = loadPublicKey()
   var privKey   = await loadPrivateKey()
@@ -63,11 +63,11 @@ window.onload = async function() {
     var form0 = forms[0]
     log('payload', form0.payload)
     assert(form0.payload ===
-      '[["inp1","Input to itsame"],["uuid","a-unique-id"]]')
+      '[["inp1","Input to pearid"],["uuid","a-unique-id"]]')
     assert(form0.payNode)
     assert(form0.sigNode)
   })
-  log("itsame_test: onload done")
+  log("pearid_test: onload done")
 }
 
 // end of test.js
