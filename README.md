@@ -59,23 +59,29 @@ be able to impersonate you on whatever servers you've registered with.
 
 You can also create a public/private key on the command line and copy/paste
 them into PearId:
+
 ```
 # On linux
 openssl genrsa -out pear.private 4096
 openssl rsa -in pear.private -pubout -out pear.public
 ```
 
+> TODO: the browser should allow loading these from a file, since it's
+> better to leave these out of your paste buffer.
+
 ## Browser Extension
-[browser/pearid.js](./browser/pearid.js) contains a browser extension which
-automatically signs (injects a signature) into elements containing
-`class='pearid-form'`. It requires the user to copy their signature into the
-extension.
+[browser/pearid.js](./browser/pearid.js) both signs (authenticates) change
+requests with your PearId (i.e. posting a message, sending a changelist, making
+an admin change, etc) as well as decrypts private data sent from the server
+which has been encrypted with your PearId (i.e. private messages, etc).
 
-> Note: the below example is not representative. The page designer will likely
-> make some of the elements (i.e. signature, payload and pearid) hidden and/or
-> readonly.
+### Signing Pages
 
-For example, a page with:
+> Note: the below example is complete but not fully representative. The page
+> designer will likely make some of the elements (i.e. signature, payload and
+> pearid) hidden and/or readonly.
+
+For example, for the following page:
 
 ```html
 <!-- Triggers the extension to set the pear id
@@ -101,14 +107,13 @@ For example, a page with:
   <input class='pearid-signature'></input>
   <input type="button" onclick="pearFormButton('user-form')" value="Submit">
 </form>
-
 ```
 
 When first loaded, the extension will do nothing because the `id=pearid` element
 has `value=noid`. Clicking the `Get PearId` button will clear this field and
-cause the PearId extension to fill it with your Pear Id (your public key). The
-server can then use this to identify you (look up your "username" that they have
-stored) as well as verify the signatures generated.
+cause the PearId extension to ask if you'd like to fill it with your PearId
+(your public key). The server can then use this to identify you (look up your
+"username" that they have stored) as well as verify the signatures generated.
 
 On page load (and any changes to `pearid-value` elements), the page's
 `pearid-payload` value/s will updated and the `pearid-signature` value/s to the
@@ -124,6 +129,55 @@ When the user hits `submit`, the `submitForm` javascript will see the updated
 payload, signature and PearId; which they then send to the server which should
 validate the uuid and ACL the PearId (lookup the public key hash for the user
 authorizations).
+
+### Decrypting elements
+
+Servers can also "log you in" by (for example) redirecting you to a
+`?userid=1234` page which:
+
+* Already contains your `pearid` (as stored in the server), bypassing the
+  above "Get PearId" step.
+* The page can include elements with `class="pearid-encrpyted"` which the PearId
+  extension decrypt and inject into the page.
+
+So for example if the encrypted message is:
+
+```
+I have a secret, I like applesauce with <b>cinnamon</b>
+```
+
+Then the following:
+
+```
+<p><span class="pearid-encrypted">
+  23432k(base64 encrypted text)l23kj
+</span>
+```
+
+Will become:
+
+```
+<p><span class="pearid-decrypted">
+  I have a secret, I like applesauce with <b>cinnamon</b>
+</span>
+```
+
+> Note: the element's `innerHTML` is set to the decrypted message and
+> `pearid-encrpyted` class is replaced with `pearid-decrypted`. Also, newlines
+> are not actually added before/after (that was just for demonstration)
+
+If decryption fails then the element will be the following. Decryption will fail
+for anyone impersonating your "user" (i.e. setting to your `?userid` paramater)
+who doesn't actually have your private PearId (private key). This means that
+although they will see the public information of the website as if they were
+your user (i.e. probably your username, public posts, etc), they won't be able
+to see any of the data which the server encrypts (which it intends to be
+private).
+
+```
+<p><span class="pearid-error">decryption failed</span>
+```
+
 
 ## Webpage / Server Requirements
 Designing a webpage to interact with the pearid extension is easy.

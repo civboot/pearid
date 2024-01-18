@@ -64,7 +64,27 @@ const fmtKey = (header, key) => {
 }
 
 // ---------------------------
-// -- Crypto Stuff
+// -- Crypto Utils
+
+const exportPublicKey = async (publicKey) => {
+  var exported = await subtle.exportKey("spki", publicKey)
+  return fmtKey("PUBLIC", encodeB64(exported))
+}
+const exportPrivateKey = async (privateKey) => {
+  var exported = await subtle.exportKey("pkcs8", privateKey)
+  return fmtKey("PRIVATE", encodeB64(exported))
+}
+const createKeyPair = async() => {
+  var pair = await subtle.generateKey(
+    RSA_PSS_PAIR, true, ["sign", "verify"])
+  return {
+    publicKey: await exportPublicKey(pair.publicKey),
+    privateKey: await exportPrivateKey(pair.privateKey),
+  }
+}
+
+// ---------------------------
+// -- Sign / Verify
 
 const RSA_PSS = {
   name: "RSA-PSS",
@@ -105,25 +125,6 @@ const importSigningKey = async (key) => {
   return importKey_RSA_PSS(key, "pkcs8", ["sign"])
 }
 
-const exportPublicKey = async (verifyingKey) => {
-  var exported = await subtle.exportKey("spki", verifyingKey)
-  return fmtKey("PUBLIC", encodeB64(exported))
-}
-const exportPrivateKey = async (signingKey) => {
-  var exported = await subtle.exportKey("pkcs8", signingKey)
-  return fmtKey("PRIVATE", encodeB64(exported))
-}
-
-const createKeyPair = async() => {
-  var pair = await subtle.generateKey(
-    RSA_PSS_PAIR, true, ["sign", "verify"])
-  return {
-    publicKey: await exportPublicKey(pair.publicKey),
-    privateKey: await exportPrivateKey(pair.privateKey),
-  }
-}
-
-
 const sign = async(text, privateKey) => {
   var key; try { key = await importSigningKey(privateKey)
   } catch(e) {
@@ -145,6 +146,45 @@ verify = async (text, signature, publicKey) => {
     key,
     decodeB64(signature),
     new TextEncoder().encode(text))
+}
+
+// ---------------------------
+// -- Encrypt / Decrypt
+
+const RSA_OAEP = {
+    name: "RSA-OAEP",
+    hash: { name: "SHA-256" }
+};
+
+async function importKey_RSA_OAEP(key, format, keyUsages) {
+  var cleanKey = unfmtKey(key)
+  return await crypto.subtle.importKey(
+    format,
+    decodeB64(cleanKey),
+    RSA_OAEP,
+    false,
+    keyUsages);
+}
+async function pubEncryptKey(key) {
+  return importKey_RSA_OAEP(key, "spki", ["encrypt"])
+}
+async function privateEncryptKey(key) {
+  return importKey_RSA_OAEP(key, "pkcs8", ["decrypt"])
+}
+
+encrypt = async function(text, publicKey) {
+  const encrypted = await subtle.encrypt(
+    RSA_OAEP,
+    await pubEncryptKey(publicKey),
+    new TextEncoder().encode(text))
+  return encodeB64(encrypted)
+}
+
+// Decrypt a string in b64 of form
+decrypt = async function(encrypted, privateKey) {
+  const key = await privateEncryptKey(privateKey)
+  const text = await subtle.decrypt(RSA_OAEP, key, decodeB64(encrypted))
+  return new TextDecoder().decode(text);
 }
 
 // ---------------------------
@@ -248,4 +288,27 @@ const addChangeListeners = () => {
       valueEl.addEventListener('change', updateSignatures)
     }
   }
+}
+
+const decryptElement = async (elem, privateKey) => {
+  let eclass = 'pearid-encrypted'
+  let cl = elem.classList; assert(cl.contains(eclass))
+  try {
+    log('decrypting', elem.innerText)
+    var decrypted = await decrypt(elem.innerText, privateKey)
+  } catch (e) {
+    cl.replace(eclass, 'pearid-error')
+    cl.innerText = 'decryption failed'
+    return
+  }
+  elem.innerHTML = decrypted
+  cl.replace('pearid-encrypted', 'pearid-decrypted')
+}
+
+const decryptAll = async (privateKey) => {
+  for(el of document.getElementsByClassName('pearid-encrypted')) {
+    await decryptElement(el, privateKey)
+  }
+  return forms
+
 }

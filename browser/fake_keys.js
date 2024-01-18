@@ -70,3 +70,7 @@ S8D+PjBb3f6SiWrJY5vyQSnRWaPiwdFzM7lKtk6TS/boNzmUTfUtN6InuvcrdILl
 e+7x3qE0VcHyFIvH3hW1NQLhuLVmOQ==
 -----END PRIVATE KEY-----
 `
+
+ENCRYPTED = `
+
+`.replace(/\s/g, "")

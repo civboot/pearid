@@ -64,7 +64,27 @@ const fmtKey = (header, key) => {
 }
 
 // ---------------------------
-// -- Crypto Stuff
+// -- Crypto Utils
+
+const exportPublicKey = async (publicKey) => {
+  var exported = await subtle.exportKey("spki", publicKey)
+  return fmtKey("PUBLIC", encodeB64(exported))
+}
+const exportPrivateKey = async (privateKey) => {
+  var exported = await subtle.exportKey("pkcs8", privateKey)
+  return fmtKey("PRIVATE", encodeB64(exported))
+}
+const createKeyPair = async() => {
+  var pair = await subtle.generateKey(
+    RSA_PSS_PAIR, true, ["sign", "verify"])
+  return {
+    publicKey: await exportPublicKey(pair.publicKey),
+    privateKey: await exportPrivateKey(pair.privateKey),
+  }
+}
+
+// ---------------------------
+// -- Sign / Verify
 
 const RSA_PSS = {
   name: "RSA-PSS",
@@ -105,25 +125,6 @@ const importSigningKey = async (key) => {
   return importKey_RSA_PSS(key, "pkcs8", ["sign"])
 }
 
-const exportPublicKey = async (verifyingKey) => {
-  var exported = await subtle.exportKey("spki", verifyingKey)
-  return fmtKey("PUBLIC", encodeB64(exported))
-}
-const exportPrivateKey = async (signingKey) => {
-  var exported = await subtle.exportKey("pkcs8", signingKey)
-  return fmtKey("PRIVATE", encodeB64(exported))
-}
-
-const createKeyPair = async() => {
-  var pair = await subtle.generateKey(
-    RSA_PSS_PAIR, true, ["sign", "verify"])
-  return {
-    publicKey: await exportPublicKey(pair.publicKey),
-    privateKey: await exportPrivateKey(pair.privateKey),
-  }
-}
-
-
 const sign = async(text, privateKey) => {
   var key; try { key = await importSigningKey(privateKey)
   } catch(e) {
@@ -145,6 +146,45 @@ verify = async (text, signature, publicKey) => {
     key,
     decodeB64(signature),
     new TextEncoder().encode(text))
+}
+
+// ---------------------------
+// -- Encrypt / Decrypt
+
+const RSA_OAEP = {
+    name: "RSA-OAEP",
+    hash: { name: "SHA-256" }
+};
+
+async function importKey_RSA_OAEP(key, format, keyUsages) {
+  var cleanKey = unfmtKey(key)
+  return await crypto.subtle.importKey(
+    format,
+    decodeB64(cleanKey),
+    RSA_OAEP,
+    false,
+    keyUsages);
+}
+async function pubEncryptKey(key) {
+  return importKey_RSA_OAEP(key, "spki", ["encrypt"])
+}
+async function privateEncryptKey(key) {
+  return importKey_RSA_OAEP(key, "pkcs8", ["decrypt"])
+}
+
+encrypt = async function(text, publicKey) {
+  const encrypted = await subtle.encrypt(
+    RSA_OAEP,
+    await pubEncryptKey(publicKey),
+    new TextEncoder().encode(text))
+  return encodeB64(encrypted)
+}
+
+// Decrypt a string in b64 of form
+decrypt = async function(encrypted, privateKey) {
+  const key = await privateEncryptKey(privateKey)
+  const text = await subtle.decrypt(RSA_OAEP, key, decodeB64(encrypted))
+  return new TextDecoder().decode(text);
 }
 
 // ---------------------------
@@ -250,6 +290,29 @@ const addChangeListeners = () => {
   }
 }
 
+const decryptElement = async (elem, privateKey) => {
+  let eclass = 'pearid-encrypted'
+  let cl = elem.classList; assert(cl.contains(eclass))
+  try {
+    log('decrypting', elem.innerText)
+    var decrypted = await decrypt(elem.innerText, privateKey)
+  } catch (e) {
+    cl.replace(eclass, 'pearid-error')
+    cl.innerText = 'decryption failed'
+    return
+  }
+  elem.innerHTML = decrypted
+  cl.replace('pearid-encrypted', 'pearid-decrypted')
+}
+
+const decryptAll = async (privateKey) => {
+  for(el of document.getElementsByClassName('pearid-encrypted')) {
+    await decryptElement(el, privateKey)
+  }
+  return forms
+
+}
+
 
 PUBLIC_KEY = `
 -----BEGIN PUBLIC KEY-----
@@ -323,11 +386,15 @@ e+7x3qE0VcHyFIvH3hW1NQLhuLVmOQ==
 -----END PRIVATE KEY-----
 `
 
+ENCRYPTED = `
+
+`.replace(/\s/g, "")
+
 // pearid test and playground
 // Note: this is stitched with 'lib.js' and 'fake_keys.js' to create 'pearid_test.js'
 
 // see fake_keys.js (make.lua)
-function loadPublicKey() { return PUBLIC_KEY }
+function loadPublicKey()  { return PUBLIC_KEY }
 function loadPrivateKey() { return PRIVATE_KEY }
 
 function _pearForm(form, elem) {
@@ -361,14 +428,27 @@ async function showTest() {
   const text = el('show-text').value
   log('showTest text: ' + text)
 
-  var publicKey = loadPublicKey()
-  var privKey   = loadPrivateKey()
+  var pubKey  = loadPublicKey()
+  var privKey = loadPrivateKey()
 
   var s = await sign(text, privKey)
   el('signature').innerHTML = s
 
-  var v = await verify(text, s, publicKey)
+  var v = await verify(text, s, pubKey)
   el('verified').innerHTML = v + ''
+
+  var elem = el('encrypt-then-decrypt')
+  var e = await encrypt(elem.innerHTML, pubKey)
+  assert(e != elem.innerHTML)
+  elem.innerText = e
+  await decryptElement(elem, privKey)
+
+  var r = el('replace-class')
+  log('replace:', r, r.classList)
+  assert(r.classList.contains('old-class'))
+  r.classList.replace('old-class', 'new-class')
+  assert(r.innerText == 'This is the old data')
+  r.innerHTML = 'This is the <b>new</b> data'
 }
 
 
@@ -394,8 +474,8 @@ window.onload = async function() {
   document.getElementById('generate').addEventListener('click', generateOptions);
 
   log("pearid_test: onload")
-  var publicKey = loadPublicKey()
-  var privKey   = loadPrivateKey()
+  var pubKey  = loadPublicKey()
+  var privKey = loadPrivateKey()
 
   await test('framework', async function() {})
   await test('export', async function() {
@@ -404,14 +484,14 @@ window.onload = async function() {
     assert(privKey.trim() == exportedPriv.trim())
 
     var exportedPub = await exportPublicKey(
-        await importVerifyingKey(publicKey))
-    assert(publicKey.trim() == exportedPub.trim())
+        await importVerifyingKey(pubKey))
+    assert(pubKey.trim() == exportedPub.trim())
   })
   await test('sign', async function() {
     var text = "this is a test"
     var s = await sign(text, privKey)
-    assert(await verify(text, s, publicKey))
-    assert(!await verify("this is 1 test", s, publicKey))
+    assert(await verify(text, s, pubKey))
+    assert(!await verify("this is 1 test", s, pubKey))
   })
   await test('forms', async function() {
     var forms = findForms();
@@ -422,6 +502,13 @@ window.onload = async function() {
       '[["inp1","Input to pearid"],["uuid","a-unique-id"]]')
     assert(form0.payloadEl)
     assert(form0.signatureEl)
+  })
+  await test('encrypt', async function() {
+    var text = 'encrypted text'
+    var e = await encrypt(text, pubKey)
+    assert(text != e)
+    var d = await decrypt(e, privKey)
+    assert(d == text)
   })
   await test('ALL PASS', async function() {})
   log("pearid_test: onload done")

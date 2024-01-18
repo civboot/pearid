@@ -27,7 +27,7 @@ Click to "login" with your browser
 The page uses fake keys to calculate and populate these.
 "hello world" of signatures.
 
-<!-- this is manually listned to in test.js -->
+<!-- this is manually listened to in test.js -->
 <p><input
   id="show-text" size="100"
   value="The quick brown fox jumps over the lazy dog"
@@ -36,6 +36,17 @@ The page uses fake keys to calculate and populate these.
 <!-- a method is hand-crafted to update these signatures --!>
 <p><b>Signature:</b> <span id='signature'></span></p>
 <p><b>Verfied: <span id='verified'></span></b><p>
+<p><b>Encrypted then Decrypted by test.js:</b>
+<span id='encrypt-then-decrypt' class='pearid-encrypted'>
+  super <b>secret</b> information
+</span></p>
+
+<p><b>Fails to decrypt in test.js:</b>
+<span id='decrypt-fail' class='pearid-encrpyted'>not really encrpyted</span></p>
+
+<p><b>Replace span demo:</b> <span id='replace-class' class="old-class">
+  This is the old data
+</span></p>
 
 <h2>Tests</h2>
 test.js adds to this list

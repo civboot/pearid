@@ -37,10 +37,22 @@ local function verify()
   exe[[openssl dgst -sha256 -verify out/public.key -signature out/sha256.sign out/plain.txt]]
 end
 
+local function encrypt()
+  exe('openssl rsautl -encrypt -inkey out/public.key -pubin'
+      ..' -in out/plain.txt -out out/encrypted.data')
+end
+
+local function decrypt()
+  exe('openssl rsautl -decrypt -inkey out/private.key'
+       ..' -in out/encrypted.data -out out/decrypted.txt')
+end
+
 print'Using (or generating) keys in out/private.key and out/public.key'
 exe[[mkdir -p out/]]
 createPlain()
 if not fileExists'out/public.key' then genKeys() end
 sign()
 verify()
+encrypt()
+decrypt()
 print'Done. Keys work'

@@ -2,7 +2,7 @@
 // Note: this is stitched with 'lib.js' and 'fake_keys.js' to create 'pearid_test.js'
 
 // see fake_keys.js (make.lua)
-function loadPublicKey() { return PUBLIC_KEY }
+function loadPublicKey()  { return PUBLIC_KEY }
 function loadPrivateKey() { return PRIVATE_KEY }
 
 function _pearForm(form, elem) {
@@ -36,14 +36,27 @@ async function showTest() {
   const text = el('show-text').value
   log('showTest text: ' + text)
 
-  var publicKey = loadPublicKey()
-  var privKey   = loadPrivateKey()
+  var pubKey  = loadPublicKey()
+  var privKey = loadPrivateKey()
 
   var s = await sign(text, privKey)
   el('signature').innerHTML = s
 
-  var v = await verify(text, s, publicKey)
+  var v = await verify(text, s, pubKey)
   el('verified').innerHTML = v + ''
+
+  var elem = el('encrypt-then-decrypt')
+  var e = await encrypt(elem.innerHTML, pubKey)
+  assert(e != elem.innerHTML)
+  elem.innerText = e
+  await decryptElement(elem, privKey)
+
+  var r = el('replace-class')
+  log('replace:', r, r.classList)
+  assert(r.classList.contains('old-class'))
+  r.classList.replace('old-class', 'new-class')
+  assert(r.innerText == 'This is the old data')
+  r.innerHTML = 'This is the <b>new</b> data'
 }
 
 
@@ -69,8 +82,8 @@ window.onload = async function() {
   document.getElementById('generate').addEventListener('click', generateOptions);
 
   log("pearid_test: onload")
-  var publicKey = loadPublicKey()
-  var privKey   = loadPrivateKey()
+  var pubKey  = loadPublicKey()
+  var privKey = loadPrivateKey()
 
   await test('framework', async function() {})
   await test('export', async function() {
@@ -79,14 +92,14 @@ window.onload = async function() {
     assert(privKey.trim() == exportedPriv.trim())
 
     var exportedPub = await exportPublicKey(
-        await importVerifyingKey(publicKey))
-    assert(publicKey.trim() == exportedPub.trim())
+        await importVerifyingKey(pubKey))
+    assert(pubKey.trim() == exportedPub.trim())
   })
   await test('sign', async function() {
     var text = "this is a test"
     var s = await sign(text, privKey)
-    assert(await verify(text, s, publicKey))
-    assert(!await verify("this is 1 test", s, publicKey))
+    assert(await verify(text, s, pubKey))
+    assert(!await verify("this is 1 test", s, pubKey))
   })
   await test('forms', async function() {
     var forms = findForms();
@@ -97,6 +110,13 @@ window.onload = async function() {
       '[["inp1","Input to pearid"],["uuid","a-unique-id"]]')
     assert(form0.payloadEl)
     assert(form0.signatureEl)
+  })
+  await test('encrypt', async function() {
+    var text = 'encrypted text'
+    var e = await encrypt(text, pubKey)
+    assert(text != e)
+    var d = await decrypt(e, privKey)
+    assert(d == text)
   })
   await test('ALL PASS', async function() {})
   log("pearid_test: onload done")
