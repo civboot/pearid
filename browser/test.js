@@ -75,11 +75,15 @@ generateOptions = async function() {
   document.getElementById('private-key').value = pair.privateKey
 }
 
+loadFile = async function() {
+  el('loaded-file').value = await el('load-file').files[0].text()
+}
+
 window.onload = async function() {
   showTest()
   el('show-text').addEventListener('change', showTest)
-
-  document.getElementById('generate').addEventListener('click', generateOptions);
+  el('load-file').addEventListener('change', loadFile)
+  el('generate').addEventListener('click', generateOptions);
 
   log("pearid_test: onload")
   var pubKey  = loadPublicKey()
@@ -112,11 +116,18 @@ window.onload = async function() {
     assert(form0.signatureEl)
   })
   await test('encrypt', async function() {
-    var text = 'encrypted text'
+    var text = 'some encrypted text'
     var e = await encrypt(text, pubKey)
     assert(text != e)
     var d = await decrypt(e, privKey)
     assert(d == text)
+    log('example encrypted:', e)
+  })
+  await test('encrypted example', async () => {
+    try {
+      var d = await decrypt(ENCRYPTED, privKey)
+      log('decrypted in test.js:', d)
+    } catch(e) { loge(e) }
   })
   await test('ALL PASS', async function() {})
   log("pearid_test: onload done")

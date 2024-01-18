@@ -13,9 +13,13 @@
 > **DO NOT USE THIS SOFTWARE FOR ANY CRITICAL DATA OR SERVICES**
 
 pearid (Pear Id) is a simple standard for proving your identity with web (or other)
-servers. It is designed to be easy to both implement and use. It includes a
-browser extension which allows ultra-lightweight identity verification for the
-web and beyond. Other libraries will likely be provided and/or linked in the
+servers as well as loading encrypted data meant for your eyes only. It includes
+a browser extension which allows ultra-lightweight identity verification for the
+web, but is designed to be used for servers that want to support alternative
+protocols to the web but might still want idenity verification (i.e. gophernet
+with POST)
+
+Other libraries (lua, python, etc) will likely be provided and/or linked in the
 future.
 
 PearId is part of the [Civboot.org][civboot] tech stack and is designed to meet
@@ -27,19 +31,19 @@ software.
 _([icon
 source](https://publicdomainvectors.org/en/free-clipart/Pear-vector-clip-art/5832.html))_
 
-## Getting Started (Browser Extension)
-
+## Getting Started for the Web (Browser Extension)
 Install the browser extension. Eventually this will be provided on the
 Chrome/Firefox web stores. For now (or if developing) you install with:
 
 * Chrome: url `chrome://extensions` -> click **Load Unpacked** -> load
-  `browser/` directory in pearid
+  `browser/` directory from this repo
 * Firefox: not yet tested or supported
 
-Once installed, open the extension settings and click **Generate New Keypair**.
-**Warning:** PairId only stores the keys locally and there is no way to recover
-a lost private key, so consider storing your private key somewhere private and
-secure.
+Once installed, open the **extension settings** and click **Generate New
+Keypair**.
+
+**Warning:** PairId only stores keys locally and there is no way to recover a
+lost private key, so consider storing your private key somewhere secure.
 
 The public key (called your **PearId**) can be shared with the servers/websites
 you want to access with your identity. The browser extension will automatically
@@ -50,15 +54,15 @@ be able to impersonate you on whatever servers you've registered with.
 
 * **DON'T** share it with anyone you don't share your bank account with, and
   consider keeping it secret from them too.
-* **DO** keep it loaded it into your PearId
-  [browser extension](#browser-extension) to sign request payloads
-* **DO** load it into applications you trust in order to sign request payloads
-* **MAYBE** store it in secure locations you trust.
+* **DO** keep it loaded it into your PearId browser extension to sign webpages
+* **DO** load it into (or provide a path to) applications you trust in order to
+  sign request payloads
+* **DO** keep extra copies safe in one or more secure and private locations
 
 ### Bring Your Own Id
 
-You can also create a public/private key on the command line and copy/paste
-them into PearId:
+You can also create a public/private key on the command line and load them into
+PearId:
 
 ```
 # On linux
@@ -66,10 +70,7 @@ openssl genrsa -out pear.private 4096
 openssl rsa -in pear.private -pubout -out pear.public
 ```
 
-> TODO: the browser should allow loading these from a file, since it's
-> better to leave these out of your paste buffer.
-
-## Browser Extension
+## How to use the Browser Extension
 [browser/pearid.js](./browser/pearid.js) both signs (authenticates) change
 requests with your PearId (i.e. posting a message, sending a changelist, making
 an admin change, etc) as well as decrypts private data sent from the server
@@ -130,24 +131,22 @@ payload, signature and PearId; which they then send to the server which should
 validate the uuid and ACL the PearId (lookup the public key hash for the user
 authorizations).
 
-### Decrypting elements
+### Decrypting Page Elements
 
 Servers can also "log you in" by (for example) redirecting you to a
 `?userid=1234` page which:
 
 * Already contains your `pearid` (as stored in the server), bypassing the
   above "Get PearId" step.
-* The page can include elements with `class="pearid-encrpyted"` which the PearId
-  extension decrypt and inject into the page.
+* The page can include elements with `class="pearid-encrypted"` which the PearId
+  extension will decrypt and inject into the page.
 
 So for example if the encrypted message is:
-
 ```
 I have a secret, I like applesauce with <b>cinnamon</b>
 ```
 
 Then the following:
-
 ```
 <p><span class="pearid-encrypted">
   23432k(base64 encrypted text)l23kj
@@ -155,29 +154,27 @@ Then the following:
 ```
 
 Will become:
-
 ```
 <p><span class="pearid-decrypted">
-  I have a secret, I like applesauce with <b>cinnamon</b>
+I have a secret, I like applesauce with <b>cinnamon</b>
 </span>
 ```
 
 > Note: the element's `innerHTML` is set to the decrypted message and
-> `pearid-encrpyted` class is replaced with `pearid-decrypted`. Also, newlines
-> are not actually added before/after (that was just for demonstration)
+> `pearid-encrpyted` class is replaced with `pearid-decrypted.
 
-If decryption fails then the element will be the following. Decryption will fail
-for anyone impersonating your "user" (i.e. setting to your `?userid` paramater)
-who doesn't actually have your private PearId (private key). This means that
-although they will see the public information of the website as if they were
-your user (i.e. probably your username, public posts, etc), they won't be able
-to see any of the data which the server encrypts (which it intends to be
-private).
-
+If decryption fails then the element will be:
 ```
 <p><span class="pearid-error">decryption failed</span>
 ```
 
+Decryption **will** fail for anyone impersonating your "user" (i.e. setting to
+your `?userid` paramater) who doesn't actually have your private PearId (private
+key). This means that although they will see the public information of
+the website as if they were you (i.e. probably your username, any public posts,
+etc), they won't be able to see any of the data which the server encrypts (i.e.
+private messages, etc) -- those will all be the above "decryption failed"
+message.
 
 ## Webpage / Server Requirements
 Designing a webpage to interact with the pearid extension is easy.
@@ -231,6 +228,36 @@ tiny amount of javascript+server logic
 > valid mutations to the server, not for restricting what can be viewed.
 > Anything requiring privacy should develop their own standard (although that
 > standard COULD possibly use the private PairId key for encryption).
+
+### Keeping information Private (encryption)
+See **Decrypting Page Elements** for how to include encrypted data in
+the web-page.
+
+The basic idea is that any private content you want to serve should be
+first encrypted with the public key and included as the `innerText` of
+an element with `class=pearid-encrypted`.
+
+For example, imagine you were viewing the private messages for userid=1234
+
+```
+<ul>
+  <li>Messages with <span class="pearid-encrypted">
+    (encrypted link to view messages with Bob userid=1233)
+  </span></li>
+  <li>Messages with <span class="pearid-encrypted">
+    (encrypted link to view messages with Alice userid=1232)
+  </span></li>
+</ul>
+```
+
+The above links would be redirect urls to view messages between yourself and Bob
+or Alice. Those links would then contain their own `pearid-encrypted` blobs with
+the actual messages.
+
+With the above example, the impersonator **would** be able to see how many
+corespondants userid=1234 has had -- so you may want to encrypt the entire
+`<ul>...</ul>`, and use a "load more" button to load more (with url paramaters for
+selecting them).
 
 ## Development Notes
 Testing is done locally by:

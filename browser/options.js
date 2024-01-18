@@ -42,5 +42,11 @@ const restoreOptions = () => {
 };
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
-document.getElementById('save').addEventListener('click', saveOptions);
-document.getElementById('generate').addEventListener('click', generateOptions);
+el('save').addEventListener('click', saveOptions);
+el('generate').addEventListener('click', generateOptions);
+el('public-file').addEventListener('change', async () => {
+  el('public-key').value = await el('public-file').files[0].text()
+})
+el('private-file').addEventListener('change', async () => {
+  el('private-key').value = await el('private-file').files[0].text()
+})

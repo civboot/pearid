@@ -81,8 +81,20 @@ extension.
 </form>
 <input type="button" onclick="submitForm('user-form')" value="Submit">
 
-<h2>Generate Keys</h2>
-Demonstrate generating keypairs (to test options.js)
+<h2>Decrypt Data</h2>
+
+PearId will decrypt this data if you load the public/private keys from
+fake_keys.js into the extension
+
+<p><span id='encrypted' class='pearid-encrypted'></span>
+<script>document.getElementById('encrypted').innerText=ENCRYPTED</script>
+
+<h2>Key Loading / Generation</h2>
+<p>Load file
+<p><textarea rows="4" cols="70" id="loaded-file"></textarea>
+<p>Import: <input type="file" id="load-file"></input>
+
+<p>Demonstrate generating keypairs (to test options.js)
 <p><button id="generate">Generate Keypair</button>
 <p><b>Generated Public Key</b>
 <p><textarea rows="14" cols="70" id="public-key"></textarea>

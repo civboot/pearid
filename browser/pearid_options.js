@@ -249,7 +249,7 @@ findForms = () => {
   return forms
 }
 
-const updateSignatures = async (_ev) => {
+const loadKeysFromDoc = async () => {
   if(!subtle) {
     log("pearid: subtle crypto not available. Exiting")
     return
@@ -258,13 +258,17 @@ const updateSignatures = async (_ev) => {
   if (!id
       || (typeof id.value == 'undefined')
       || (id.value.trim() == NOID)) { return }
-
   let keys = await getKeysFromStorage()
   if(id.value.trim() != keys.publicKey.trim()) {
     var msg = "PearID: okay to share your identity with webpage?"
     if(confirm(msg)) { id.value = keys.publicKey }
     else             { id.value = NOID; return }
   }
+  return keys
+}
+
+const updateSignatures = async (_ev) => {
+  let keys = await loadKeysFromDoc(); if(!keys) { return }
   for(form of findForms()) {
     if(form.payloadEl) {
       form.payloadEl.value = form.payload }
@@ -275,12 +279,39 @@ const updateSignatures = async (_ev) => {
   }
 }
 
+const decryptElement = async (elem, privateKey) => {
+  log('decrypting element', elem)
+  let eclass = 'pearid-encrypted'
+  let cl = elem.classList; assert(cl.contains(eclass))
+  try {
+    log('decrypting', elem.innerText)
+    var decrypted = await decrypt(elem.innerText, privateKey)
+  } catch (e) {
+    loge(e)
+    cl.replace(eclass, 'pearid-error')
+    elem.innerText = 'decryption failed'
+    return
+  }
+  elem.innerHTML = decrypted
+  cl.replace('pearid-encrypted', 'pearid-decrypted')
+}
+
+const decryptAll = async () => {
+  log("Decrypting all")
+  let keys = await loadKeysFromDoc(); if(!keys) { return }
+  log("Decrypting elements")
+  for(el of document.getElementsByClassName('pearid-encrypted')) {
+    await decryptElement(el, keys.privateKey)
+  }
+}
+
 // Add listeners to id=pearid and the class=pearid-value elements.
 //
 // Whenever they change they cause a global resign
 const addChangeListeners = () => {
   if(!subtle) { return }
   var pearid = el('pearid'); if(!pearid) { return }
+  pearid.addEventListener('change', decryptAll)
   pearid.addEventListener('change', updateSignatures)
 
   for(form of findForms()) {
@@ -290,28 +321,6 @@ const addChangeListeners = () => {
   }
 }
 
-const decryptElement = async (elem, privateKey) => {
-  let eclass = 'pearid-encrypted'
-  let cl = elem.classList; assert(cl.contains(eclass))
-  try {
-    log('decrypting', elem.innerText)
-    var decrypted = await decrypt(elem.innerText, privateKey)
-  } catch (e) {
-    cl.replace(eclass, 'pearid-error')
-    cl.innerText = 'decryption failed'
-    return
-  }
-  elem.innerHTML = decrypted
-  cl.replace('pearid-encrypted', 'pearid-decrypted')
-}
-
-const decryptAll = async (privateKey) => {
-  for(el of document.getElementsByClassName('pearid-encrypted')) {
-    await decryptElement(el, privateKey)
-  }
-  return forms
-
-}
 
 generateOptions = async function() {
   log('generating options')
@@ -357,5 +366,11 @@ const restoreOptions = () => {
 };
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
-document.getElementById('save').addEventListener('click', saveOptions);
-document.getElementById('generate').addEventListener('click', generateOptions);
+el('save').addEventListener('click', saveOptions);
+el('generate').addEventListener('click', generateOptions);
+el('public-file').addEventListener('change', async () => {
+  el('public-key').value = await el('public-file').files[0].text()
+})
+el('private-file').addEventListener('change', async () => {
+  el('private-key').value = await el('private-file').files[0].text()
+})

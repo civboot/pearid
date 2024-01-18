@@ -71,6 +71,8 @@ e+7x3qE0VcHyFIvH3hW1NQLhuLVmOQ==
 -----END PRIVATE KEY-----
 `
 
+// copy/paste the above keys for etc/check_keys.js
+// then call: cat out/encrypted.data | base64
 ENCRYPTED = `
-
-`.replace(/\s/g, "")
+UphwTaiZUA16sU/5eeoteks8/tBtEdYE8SpM6eQ02htb2nstjTpbbZHGi3ttlRFMlZbubonL0K+Jl/qSUvG5ANLAt0ENtLRSY7kQJnXSYFQge45ANGPYabZO0TeJ9ER7f7bV/rqbWN2BPChpVX1d/hc+QksudicHsdE7vHRcKbcK8M80sOSe4/QzoKdkoOdYVs50K74+Sp2MZDzHXimsUxFhMq9P6cUo2aCs1BnZFaFouRfdgZCBNdJ7og6hQs5BH5TJbfEYqy/KVZs9u3F1IQJ23XAlxPMK+/jNgxQYwxqJ9tgS7vDCVKpEwU4eaPuQiOKSxIvEAr7pDjT/QRIZsYYBclsG4PvkVpaeDRdi20oeDDGMxoCYRX7gq4Mvbqv4BfotsX6EK7oQnjTHH0ygsV7iwbwoWJeojDJyxcMdKS6zpBAst+Jmi/j0APEg7ajR7gUa0Hn1qUDVbl1gXgz8vnX+P7NIlm06QeN29oLxylTkVGGSYErdVo7TbTZXd8VOEFap4S2b+2YsUwdQVXUV3fZaDanjpYzFcVWCH8DZd6Uoyp8bb8qfRs40KpnjOgesuh5DKUL1HrvAwi3pYsPhWPMpHZ7IYRwKiVBvvBDh2thWpyPtx8bVjFJvoByVw7xS58WFjJHnmNmHlIROR89JsLgH22zCXgAWFMqmLdt5brY=
+`.replace(/\s/g, '')

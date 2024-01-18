@@ -38,12 +38,12 @@ local function verify()
 end
 
 local function encrypt()
-  exe('openssl rsautl -encrypt -inkey out/public.key -pubin'
+  exe('openssl pkeyutl -encrypt -inkey out/public.key -pubin'
       ..' -in out/plain.txt -out out/encrypted.data')
 end
 
 local function decrypt()
-  exe('openssl rsautl -decrypt -inkey out/private.key'
+  exe('openssl pkeyutl -decrypt -inkey out/private.key'
        ..' -in out/encrypted.data -out out/decrypted.txt')
 end
 
